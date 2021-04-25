@@ -1,0 +1,251 @@
+\documentclass[a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{resizegather} \addtolength{\jot}{4pt}
+\usepackage{microtype}
+
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\DeclareMathOperator{\diver}{div}
+\DeclareMathOperator{\supp}{supp}
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand{\seminorm}[1]{\left\lvert#1\right\rvert}
+\newcommand{\dx}{\, dx \,}
+\newcommand{\dsigma}{\, d\sigma}
+\newcommand{\loneloc}{L^1_{\text{loc}}(\Omega)}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\norminf}[1]{\left\lVert#1\right\rVert_\infty}
+\newcommand{\normtwo}[1]{\left\lVert#1\right\rVert_2}
+\newcommand{\normltwo}[1]{\left\lVert#1\right\rVert_{L^2}}
+\newcommand{\normhone}[1]{\left\lVert#1\right\rVert_{H^1}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Pone}{\mathbb{P}_1}
+
+\title{\huge{Advanced Discretization Techniques \\ Homework 3}}
+\author{\Large{Bruno Degli Esposti}}
+\date{November 5th - November 12th, 2019}
+
+\begin{document}
+
+\maketitle
+
+\section*{Exercise 7: Non-Consistency by Quadrature}
+\begin{description}
+\item[$a)$] We can assume without loss of generality that $h < 1$ for the whole exercise,
+	so that $h^\alpha \leq h^\beta$ whenever $\alpha > \beta$. As per the hint,
+	we will make use of the following inequality, called a \emph{local inverse estimate}:
+	\[
+	\norm{v_h}_{k;T} \leq C_\text{inv} h^{-k+1} \norm{v_h}_{1;T}
+	\quad \text{for all } v_h \in X_h, \, T \in \mathcal{T}_h.
+	\]
+	By the assumption on the quadrature rule, the Cauchy-Schwarz inequality
+	and the inverse estimate, we have that
+	\begin{align*}
+	\abs{(f,v_h) - Q(f,v_h)}
+&	\leq C h^r \sum_{T \in \mathcal{T}_h} \norm{f}_{r;T} \norm{v_h}_{r;T} \\
+&	\leq C h^r \left( \sum_{T \in \mathcal{T}_h} \norm{f}_{r;T}^2   \right)^{1/2}
+	           \left( \sum_{T \in \mathcal{T}_h} \norm{v_h}_{r;T}^2 \right)^{1/2} \\
+&	= C h^r \norm{f}_r \left( \sum_{T \in \mathcal{T}_h} \norm{v_h}_{k;T}^2 \right)^{1/2} \\
+&	\leq C h^r \norm{f}_r C_\text{inv} h^{-k+1}
+	           \left( \sum_{T \in \mathcal{T}_h} \norm{v_h}_{1;T}^2 \right)^{1/2} \\
+&	= C_a h^{r-k+1} \norm{f}_r \norm{v_h}_1.
+	\end{align*}
+	We have also used the fact that $k \leq r$ and that $D^{k+1}v_h$ vanishes,
+	because $v_h$ is a polynomial of degree at most $k$ on each $T$.
+\item[$b)$] Similar arguments as in a) prove that
+	\begin{align*}
+	\abs{a(v_h,w_h) - a_h(v_h,w_h)}
+&	= \abs{(A \nabla v_h, \nabla w_h) - Q(A \nabla v_h, \nabla w_h)} \\
+&	\leq C h^r \sum_{T \in \mathcal{T}_h} \norm{A \nabla v_h}_{r;T} \norm{\nabla w_h}_{r;T} \\
+&	\leq C h^r \norm{A}_{r,\infty}
+		\sum_{T \in \mathcal{T}_h} \norm{v_h}_{r;T} \norm{w_h}_{r;T} \\
+&	= C h^r \norm{A}_{r,\infty}
+		\sum_{T \in \mathcal{T}_h} \norm{v_h}_{k;T} \norm{w_h}_{k;T} \\
+&	\leq C h^r \norm{A}_{r,\infty}
+		\left( \sum_{T \in \mathcal{T}_h} \norm{v_h}_{k;T}^2 \right)^{1/2}
+		\left( \sum_{T \in \mathcal{T}_h} \norm{w_h}_{k;T}^2 \right)^{1/2}.
+	\end{align*}
+\item[$c)$] We rely on the coercivity of $a$, given by the uniform ellipticity of $A$.
+	For each $v_h \in X_h$, we have that
+	\begin{gather*}
+	\abs{a_h(v_h,v_h)} \geq \abs{a(v_h,v_h)} - \abs{a(v_h,v_h) - a_h(v_h,v_h)} \\
+	\geq \alpha \norm{v_h}_1^2 - C h^r \norm{A}_{r,\infty}
+		\left( \sum_{T \in \mathcal{T}_h} \norm{v_h}_{k;T}^2 \right)^{1/2}
+		\left( \sum_{T \in \mathcal{T}_h} \norm{v_h}_{k;T}^2 \right)^{1/2} \\
+	\geq \alpha \norm{v_h}_1^2 - C h^r \norm{A}_{r,\infty}
+		\sum_{T \in \mathcal{T}_h} \norm{v_h}_{k;T}^2 \\
+	\geq \alpha \norm{v_h}_1^2 - C h^r \norm{A}_{r,\infty}
+		C_\text{inv}^2 h^{-2k+2} \sum_{T \in \mathcal{T}_h} \norm{v_h}_{1;T}^2 \\
+	= \alpha \norm{v_h}_1^2 - \tilde{C} h^{r-2k+2} \norm{v_h}_1^2
+	\end{gather*}
+	By taking the limit as $h \to 0$, the coefficient $\tilde{C} h^{r-2k+2}$ vanishes,
+	since by assumption $r - 2k + 2 > 0$.
+	Thus $a_h$ is uniformly coercive, for small enough~$h$.
+\item[$d)$] Strang's 1st lemma asserts that, if $a_h$ is uniformly coercive
+	(which we have just proven), the following estimate holds:
+	\begin{gather*}
+	\norm{u-u_h}_1 \leq C_s \left(
+		\inf_{v_h \in X_h} \left\lbrace
+			\norm{u-v_h}_1
+			+ \sup_{w_h \in X_h} \frac{\abs{a(v_h,w_h) - a_h(v_h,w_h)}}{\norm{w_h}_1}
+		\right\rbrace
+		+ \sup_{w_h \in X_h} \frac{\abs{(f,w_h) - Q(f,w_h)}}{\norm{w_h}_1}
+	\right)
+	\end{gather*}
+	We can remove the $\inf\{\dots\}$ by choosing $v_h = I_h u$, and we can
+	remove the two $\sup\{\dots\}$ by substituting the results from points a) and b):
+	\begin{gather*}
+	\norm{u-u_h}_1 \leq C_s \left(
+		\norm{u - I_h u}_1
+		+ \sup_{w_h \in X_h} \frac{C h^r \norm{A}_{r,\infty} \norm{I_h u}_k \norm{w_h}_k}
+		                          {\norm{w_h}_1}
+		+ C_a h^{r-k+1} \norm{f}_r
+	\right) \\
+	\norm{u-u_h}_1 \leq C_s \left(
+		\norm{u - I_h u}_1
+		+ C h^r \norm{A}_{r,\infty} \norm{I_h u}_k C_\text{inv} h^{-k+1}
+		+ C_a h^{r-k+1} \norm{f}_r
+	\right) \\
+	\norm{u-u_h}_1 \leq C_s \left(
+		C_i h^k \norm{u}_{k+1}
+		+ C h^r \norm{A}_{r,\infty} C_I \norm{u}_k C_\text{inv} h^{-k+1}
+		+ C_a h^{r-k+1} \norm{f}_r
+	\right)
+	\end{gather*}
+	We have also used the Lagrange interpolation inequality and the boundedness of $I_h$.
+	We can conclude the proof using the assumption $r \geq 2k-1$, which implies that
+	$h^{r-k+1} \leq h^k$:
+	\begin{gather*}
+	\norm{u-u_h}_1 \leq C_s \left(
+		C_i \norm{u}_{k+1}
+		+ C \norm{A}_{r,\infty} C_I \norm{u}_{k+1} C_\text{inv}
+		+ C_a \norm{f}_r
+	\right) h^k = C h^k.
+	\end{gather*}
+\end{description}
+
+\section*{Exercise 8: Poisson with Neumann boundaries as a saddle point problem}
+\begin{description}
+\item[$a)$] For any $v \in C_0^\infty(\Omega) \subset H^1(\Omega)$, we have that
+	\[
+	\int_\Omega fv \dx + 0
+	= \int_\Omega \nabla u \cdot \nabla v \dx
+	= \int_\Omega (-\Delta u) v \dx,
+	\]
+	so
+	\[
+	(\Delta u + f, v)_{L^2} = 0.
+	\]
+	Since $C_0^\infty(\Omega)$ is a dense subset of $L^2(\Omega)$, this proves
+	that $-\Delta u$ and $f$ are equal as $L^2$ functions.
+	For the second part of the proof, we have that
+	\begin{align*}
+	0
+&	= \int_\Omega \nabla u \cdot \nabla v \dx
+	  - \int_\Omega fv \dx
+	  - \int_{\partial \Omega} gv \dsigma \\
+&	= \int_{\partial \Omega} (\partial_n u)v \dsigma
+	  - \int_\Omega (\Delta u) v \dx
+	  - \int_\Omega fv \dx
+	  - \int_{\partial \Omega} gv \dsigma \\
+&	= -(\Delta u + f, v)_{L^2} + \int_{\partial \Omega} (\partial_n u - g)v \dsigma
+	= \int_{\partial \Omega} (\partial_n u - g)v \dsigma.
+	\end{align*}
+\item[$b)$] Just pick $v = 1$ in (1). This choice is allowed by the boundedness of $\Omega$.
+\item[$c)$] As per the hint, the proof relies on the Poincaré-Wirtinger inequality,
+	which asserts that there exists a constant $C > 0$ such that
+	\[
+	\norm{u-\bar{u}}_0 \leq C \norm{\nabla u}_0
+	\]
+	for any $u \in H^1(\Omega)$ with integral mean $\bar{u}$.
+	Let $\gamma \in (0,1)$ be such that
+	\[
+	\gamma \leq C \abs{\Omega}.
+	\]
+	Then $\tilde{a}$ is coercive, with coercivity constant
+	$\alpha = \min\{(1-\gamma),\gamma C^{-1}\}$:
+	\begin{align*}
+	\tilde{a}(u,u)
+&	= \int_\Omega \nabla u \cdot \nabla u \dx + (\bar{u} \abs{\Omega})^2 \\
+&	= (1-\gamma) \norm{\nabla u}_0^2 + \gamma \norm{\nabla u}_0^2
+		+ \bar{u}^2 \abs{\Omega}^2 \\
+&	\geq (1-\gamma) \norm{\nabla u}_0^2 + \gamma C^{-1} (u-\bar{u},u-\bar{u})_{L^2}
+		+ \bar{u}^2 \abs{\Omega}^2 \\
+&	= (1-\gamma) \norm{\nabla u}_0^2
+		+ \gamma C^{-1} \norm{u}_0^2
+		- 2 \gamma C^{-1} (u,\bar{u})_{L^2}
+		+ \gamma C^{-1} (\bar{u},\bar{u})_{L^2}
+		+ \bar{u}^2 \abs{\Omega}^2 \\
+&	= (1-\gamma) \norm{\nabla u}_0^2
+		+ \gamma C^{-1} \norm{u}_0^2
+		- \gamma C^{-1} \bar{u}^2 \abs{\Omega}
+		+ \bar{u}^2 \abs{\Omega}^2 \\
+&	= (1-\gamma) \norm{\nabla u}_0^2
+		+ \gamma C^{-1} \norm{u}_0^2
+		+ (-\gamma C^{-1} + \abs{\Omega}) \bar{u}^2 \abs{\Omega} \\
+&	\geq (1-\gamma) \norm{\nabla u}_0^2
+		+ \gamma C^{-1} \norm{u}_0^2
+	\geq \alpha \norm{u}_1^2.
+	\end{align*}
+\item[$d)$] Once again, we can just pick $v = 1$.
+\item[$e)$] We begin by introducing some notation:
+	\begin{gather*}
+	M = H^1(\Omega),
+	\quad X = \R,
+	\quad a(u,v) = \int_\Omega \nabla u \cdot \nabla v \dx, \\
+	b(u,\mu) = \mu \int_\Omega u \dx,
+	\quad \ell_1(v) = \int_\Omega fv \dx + \int_{\partial \Omega} gv \dsigma,
+	\quad \ell_2(\mu) = 0.
+	\end{gather*}
+	The required formulation of a saddle problem is to find
+	$(u,\lambda) \in M \times X$ such that
+	\begin{align*}
+	a(u,v) + b(v,\lambda) &= \ell_1(v) \quad \text{for all } v \in M \\
+	b(u,\mu) &= \ell_2(\mu) \quad \text{for all } \mu \in X.
+	\end{align*}
+\item[$f)$] If we choose $v = 1$ in the first equation of the saddle
+	point problem, we get
+	\[
+	0 + \lambda \abs{\Omega} = \int_\Omega f \dx + \int_{\partial \Omega} g \dsigma.
+	\]
+	If (2) holds, this means that $\lambda \abs{\Omega} = 0$,
+	so $\lambda = 0$ and $b(v,\lambda)$ vanishes for every $v \in M$.
+	Thefore the first equation of the saddle point problem (satisfied by $u$)
+	becomes (1).
+\end{description}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

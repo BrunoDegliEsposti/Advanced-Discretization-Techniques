@@ -1,0 +1,232 @@
+\documentclass[a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{resizegather} \addtolength{\jot}{4pt}
+\usepackage{microtype}
+
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\DeclareMathOperator*{\argmin}{\arg\!\min}
+\DeclareMathOperator*{\argmax}{\arg\!\max}
+\DeclareMathOperator*{\esssup}{ess\sup}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\diver}{div}
+\DeclareMathOperator{\supp}{supp}
+\newcommand{\dx}{\, dx \,}
+\newcommand{\dy}{\, dy \,}
+\newcommand{\dxy}{\, dx \:\! dy \,}
+\newcommand{\dvecx}{\, d\vec{x} \,}
+\newcommand{\dsigma}{\, d\sigma \,}
+\newcommand{\area}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\seminorm}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\dpair}[1]{\left\langle #1 \right\rangle}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Pone}{\mathbb{P}_1}
+
+\title{\huge{Advanced Discretization Techniques \\ Homework 5}}
+\author{\Large{Bruno Degli Esposti, Xingyu Xu}}
+\date{November 19th - November 26th, 2019}
+
+\begin{document}
+
+\maketitle
+
+\section*{Exercise 11: A trace estimate using the Raviart-Thomas element $\text{RT}_0$}
+\begin{description}
+\item[a)] For any $i \in \{1,2,3\}$ and any $x \in e_j \neq e_i$,
+	we know that the vector $x-x_i$ is parallel to the side $e_j$, so
+	\[
+	\frac{\abs{e_i}}{2\area{K}}(x-x_i) \cdot \nu(x) = 0
+	\]
+	by the definition of normal $\nu(x)$.
+	Otherwise, if $x \in e_i$, we get that $(x-x_i) \cdot \nu(x) = h_i$,
+	where $h_i$ is the height of the triangle $K$ with respect to the base $e_i$.
+	It then follows by the formula for the area of a triangle that
+	\[
+	\frac{\abs{e_i}}{2\area{K}}(x-x_i) \cdot \nu(x)
+	= \frac{1}{\area{K}} \frac{\abs{e_i}h_i}{2}
+	= 1,
+	\]
+	as was required. This proves that $\tau_i(x)\cdot\nu(x)=\chi_{e_i}(x)$
+	for all $x \in \partial K$. Moving on to the second part of the proof,
+	$\dim(\text{RT}_0(K)) = 1(1+2) = 3$, so we only need to prove
+	that the functions $\tau_i$ are linearly independent.
+	For this purpose, let $\alpha_1,\alpha_2,\alpha_3 \in \R$ be
+	such that $\alpha_1\tau_1(x)+\alpha_2\tau_2(x)+\alpha_3\tau_3(x) = 0$.
+	If we now take the scalar product with respect to $\nu(x)$, we get that
+	\begin{align*}
+	0
+&	= \alpha_1\tau_1(x)\cdot\nu(x)
+	+ \alpha_2\tau_2(x)\cdot\nu(x)
+	+ \alpha_3\tau_3(x)\cdot\nu(x) \\
+&	= \alpha_1\chi_{e_1}(x)+\alpha_2\chi_{e_2}(x)+\alpha_3\chi_{e_3}(x).
+	\end{align*}
+	By evaluating this identity in $x \in e_i$,
+	we can conclude that $\alpha_i = 0$ for all $i \in \{1,2,3\}$.
+	Hence $\{\tau_1,\tau_2,\tau_3\}$ forms a basis of $\text{RT}_0(K)$.
+\item[b)] We can get the	required estimate by using the formula
+	$\tau_i(x)\cdot\nu(x)=\chi_{e_i}(x)$ of point a),
+	the divergence theorem and the Cauchy-Schwarz inequality:
+	\begin{align*}
+	\norm{u}_{0,e_i}^2
+&	= \int_{e_i} u(x)^2 \dsigma
+	= \int_{\partial K} u(x)^2 \, \chi_{e_i}(x) \dsigma \\
+&	= \int_{\partial K} u(x)^2 \tau_i(x)\cdot\nu(x) \dsigma
+	= \int_K \nabla\!\cdot(u(x)^2\tau_i(x)) \dx \\
+&	= \int_K 2u(x) \nabla u(x) \cdot \tau_i(x) \dx
+	+ \int_K u(x)^2 \nabla\!\cdot \tau_i(x) \dx \\
+&	\leq 2\|u\|_{0,K}\|\nabla u\|_{0,K}\|\tau_i\|_{L^\infty}
+	+ \|\nabla\cdot\tau_i\|_{L^\infty(K)}\|u\|^2_{0,K}.
+	\end{align*}
+\item[c)] The constant $h$ is equal to the diameter of $K$. Therefore
+	\[
+	\norm{\tau_i}_{L^\infty(K)}
+	= \esssup_{x\in\partial K} \left\lbrace \frac{|e_i|}{2|K|}\norm{x-x_i} \right\rbrace
+	\leq \frac{h}{2\area{K}} h
+	\leq \frac{c}{2}.
+	\]
+	Since $K$ is a subset of $\R^2$, we have that $\nabla\!\cdot x = 2 $. Hence
+	\begin{gather*}
+	\norm{\nabla\!\cdot\tau_i}_{L^\infty(K)}
+	= \esssup_{x\in\partial K} \left\lbrace \frac{|e_i|}{2|K|}
+		\abs{\nabla\!\cdot (x-x_i)} \right\rbrace
+	= \frac{|e_i|}{2\area{K}} 2
+	\leq \frac{h}{\area{K}}
+	\leq \frac{c}{h}.
+	\end{gather*}
+\item[d)] By the inequalities we have proved in points b) and c), we have that
+	\[
+	\norm{u}^2_{0,e_i}
+	\leq \frac{c}{h}\norm{u}^2_{0,K} + c\norm{u}_{0,K}\norm{\nabla u}_{0,K}.
+	\]
+	Then, since $c$ and $h$ are both positive constants,
+	\begin{align*}
+	\norm{u}^2_{0,e_i}
+&	\leq \frac{c}{h}\norm{u}^2_{0,K}
+	+ 2c\norm{u}_{0,K}\norm{\nabla u}_{0,K}
+	+ ch\norm{\nabla u}^2_{0,K} \\
+&	= \left( (c^{1/2} h^{-1/2} \norm{u}_{0,K}
+		+ c^{1/2} h^{1/2} \norm{\nabla u}_{0,K} \right)^2.
+	\end{align*}
+	The result follows by taking the square root on both sides and making
+	the choice $C = c^{1/2}$. $\square$
+\end{description}
+
+\section*{Exercise 12: Poisson’s problem with $\text{RT}_0\text{-}\mathcal{L}_0^0$}
+Let $\lambda_1(x),\lambda_2(x),\lambda_3(x)$ be the barycentric coordinate maps for
+the triangle $K$, so that for each $x \in \R^2$ we have that
+\[
+x = \sum_{i=1}^3 \lambda_i(x) x_i
+\quad \text{and} \quad
+\sum_{i=1}^3 \lambda_i(x) = 1.
+\]
+We begin by proving the identity given as a hint.
+Let $\hat{K}$ be the reference triangle in $\R^2$,
+as defined in Chapter 2 of {\small[K,A]}.
+For any $i,j \in \{1,2,3\}$, let $F \colon \hat{K} \to K$ be
+an affine and bijective mapping such that
+$F(1,0) = x_i$ and, if $j \neq i$, $F(0,1) = x_j$.
+By the change of variables formula, it follows that
+\[
+\int_K \lambda_i(\vec{x}) \lambda_j(\vec{x}) \dvecx
+= \int_{\hat{K}} \lambda_i(F(x,y)) \lambda_j(F(x,y)) \abs{\det(dF(x,y))} \dxy.
+\]
+By the choice of $F$, and the fact that $\lambda_i \circ F$ is still an affine map,
+it's easy to see that $\lambda_i(F(x,y)) = x$ and, if $j \neq i$, $\lambda_j(F(x,y)) = y$.
+Moreover, $dF$ is a constant matrix such that $\abs{\det(dF)} = 2\area{K}$.
+If $i = j$, we get that
+\begin{align*}
+	\int_K \lambda_i(\vec{x}) \lambda_j(\vec{x}) \dvecx
+&	= 2\area{K} \int_{\hat{K}} x^2 \dxy
+	= 2\area{K} \int_0^1 \int_0^{1-x} x^2 \dy \dx \\
+&	= 2\area{K} \int_0^1 x^2 - x^3 \dx
+	= 2\area{K} \left( \frac{1}{3} - \frac{1}{4} \right)
+	= \frac{\area{K}}{12} (1+\delta_{ij}),
+\end{align*}
+as was required. If $i \neq j$, we still get that
+\begin{align*}
+	\int_K \lambda_i(\vec{x}) \lambda_j(\vec{x}) \dvecx
+&	= 2\area{K} \int_{\hat{K}} xy \dxy
+	= 2\area{K} \int_0^1 \int_0^{1-x} xy \dy \dx \\
+&	= 2\area{K} \int_0^1 \frac{1}{2} x(1-x)^2 \dx
+	= \area{K} \int_0^1 x-2x^2+x^3 \dx \\
+&	= \area{K} \left( \frac{1}{2} - \frac{2}{3} + \frac{1}{4} \right)
+	= \area{K} \left( \frac{6-8+3}{12} \right)
+	= \frac{\area{K}}{12} (1+\delta_{ij}),
+\end{align*}
+so the identity in the hint has been proved for all $i,j \in \{1,2,3\}$.
+Moving on to the central part of the proof,
+\begin{align*}
+	(\tau_{h,e_i},\tau_{h,e_j})_K
+&	= \int_K \dpair{\tau_{h,e_i}(x),\tau_{h,e_j}(x)} \dx \\
+&	= \int_K \sigma_i \sigma_j \frac{\abs{e_i}\abs{e_j}}{4\area{K}^2} \dpair{x-x_i,x-x_j} \dx.
+\end{align*}
+Let $c$ be the constant in the last integral.
+We can introduce barycentric coordinates to get that
+\begin{align*}
+	\int_K c \dpair{x-x_i,x-x_j} \dx
+&	= c \int_K \dpair{\sum_{s=1}^3 \lambda_s(x) (x_s-x_i),
+	                  \sum_{r=1}^3 \lambda_r(x) (x_r-x_j)} \dx \\
+&	= c \sum_{s,r = 1}^3 \dpair{x_s-x_i,x_r-x_j} \int_K \lambda_s(x) \lambda_r(x) \dx \\
+&	= c \sum_{s,r = 1}^3 \dpair{x_s-x_i,x_r-x_j} \frac{\abs{K}}{12}(1+\delta_{sr}).
+\end{align*}
+Let $x_c$ be the barycenter of $K$.
+Then we can further simplify the sum:
+\begin{align*}
+	(\tau_{h,e_i},\tau_{h,e_j})_K
+&	= \frac{c\abs{K}}{12} \left( \sum_{s,r = 1}^3 \dpair{x_s-x_i,x_r-x_j} 
+	                           + \sum_{s = 1}^3 \dpair{x_s-x_i,x_s-x_j} \right) \\
+&	= \frac{c\abs{K}}{12} \left( \dpair{\sum_{s=1}^3 (x_s-x_i), \sum_{r=1}^3 (x_r-x_j)}
+	                           + \sum_{s = 1}^3 \dpair{x_s-x_i,x_s-x_j} \right) \\
+&	= \frac{c\abs{K}}{12} \left( 9 \dpair{x_c-x_i, x_c-x_j}
+	                           + \sum_{s = 1}^3 \dpair{x_s-x_i,x_s-x_j} \right) \\
+&	= \sigma_i \sigma_j \frac{\abs{e_i}\abs{e_j}}{48\area{K}}
+      \left( 9 \dpair{x_c-x_i, x_c-x_j} + \sum_{s = 1}^3 \dpair{x_s-x_i,x_s-x_j} \right).
+\end{align*}
+As for the last part of the proof, we compute that
+\begin{align*}
+	(v_{h,K},\nabla\!\cdot\tau_{h,e_i})_K
+&	= \int_K v_{h,K}(x) \, \nabla\!\cdot\tau_{h,e_i}(x) \dx
+	= \int_K \sigma_i \frac{\abs{e_i}}{2\area{K}}
+	         \nabla\!\cdot (x-x_i) \dx \\
+&	= \int_K \sigma_i \frac{\abs{e_i}}{2\area{K}} 2 \dx
+	= \sigma_i \frac{\abs{e_i}}{\area{K}} \int_K 1 \dx
+	= \sigma_i \abs{e_i}. \quad \square
+\end{align*}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

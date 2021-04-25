@@ -1,0 +1,429 @@
+\documentclass[a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{resizegather} \addtolength{\jot}{4pt}
+\usepackage{microtype}
+
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\DeclareMathOperator{\diver}{div}
+\DeclareMathOperator{\supp}{supp}
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand{\dx}{\, dx \,}
+\newcommand{\dgamma}{\, d\gamma}
+\newcommand{\dsigma}{\, d\sigma}
+\newcommand{\loneloc}{L^1_{\text{loc}}(\Omega)}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\norminf}[1]{\left\lVert#1\right\rVert_\infty}
+\newcommand{\normtwo}[1]{\left\lVert#1\right\rVert_2}
+\newcommand{\normltwo}[1]{\left\lVert#1\right\rVert_{L^2}}
+\newcommand{\normhone}[1]{\left\lVert#1\right\rVert_{H^1}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\seminorm}[1]{\left\lvert#1\right\rvert}
+
+\title{\huge{Advanced Discretization Techniques \\
+Homework 1}}
+\author{\Large{Bruno Degli Esposti}}
+\date{22-29 October 2019}
+
+\begin{document}
+
+\maketitle
+
+\section*{Exercise 1: Minimization property}
+\begin{description}
+\item[$\Rightarrow)$]
+Let $u \in U$ be a solution of $J(u) = \inf_{v \in U} J(v)$.
+For each $v \in U$, the segment $\{u + t(v-u) \mid t \in [0,1]\}$
+belongs to $U$ (by the convexity assumption).
+Therefore, for all $t \in (0,1)$, we have
+\begin{gather*}
+J(u) \leq J(u + t(v-u)) \\
+\frac{1}{2}a(u,u) - f(u) \leq \frac{1}{2}a(u+t(v-u),u+t(v-u)) - f(u+t(v-u)) \\
+0 \leq t a(u,v-u) + \frac{1}{2} t^2 a(v-u,v-u) - t f(v-u) \\
+a(u,v-u) - f(v-u) \geq -\frac{1}{2} t a(v-u,v-u)
+\end{gather*}
+By taking the limit as $t \to 0$, we get the required inequality.
+\item[$\Leftarrow)$]
+Let $u$ be an element of $U$ satisfying
+\[
+a(u,v-u) \geq f(v-u) \quad \text{for all $v \in U$.}
+\]
+For a fixed $v \in U$, we have to show that $J(u) \leq J(v)$.
+Since $a$ is coercive, $a(v-u,v-u) \geq 0$.
+Then, by algebraic manipulations exploiting linearity, bilinearity and simmetry
+of $f$ and $a$, we get
+\begin{gather*}
+a(u,v-u) + \frac{1}{2} a(v-u,v-u) \geq f(v-u) \\
+\frac{1}{2} a(u+(v-u),u+(v-u)) - \frac{1}{2} a(u,u) \geq f(v) - f(u) \\
+\frac{1}{2} a(v,v) - f(v) \geq \frac{1}{2} a(u,u) - f(u) \\
+J(v) \geq J(u). \quad \square
+\end{gather*}
+\end{description}
+
+\section*{Exercise 2: Chain rule for weak derivatives}
+% https://www.desmos.com/calculator/fe049txwkn
+\begin{description}
+\item[$a1)$] Since the proof is quite long, we've split it up over 5 points.
+	We begin with the remark that, by Lagrange's theorem,
+	$f$ is a Lipschitz function with constant $L = \norminf{f'}$,
+	hence $\abs{f(x)} \leq L \abs{x} + \abs{f(0)}$ for all $x \in \R$.
+\item[$a2)$] Let $g = f \circ u$ and $h_i = f'(u) \partial_{x_i} u$
+	for each $i = 1,\dots,d$. Let $\mu$ be the Lebesgue measure on $\R^d$.
+	Before checking that the definition of weak derivative
+	holds, we first have to prove that $g$ and $\{h_i\}_{i=1,\dots,d}$ all
+	belong to $\loneloc$.
+	For each compact subset $K$ of $\Omega$ we have that
+	\begin{multline*}
+	\int_K \abs{g(x)} \dx
+	= \int_K \abs{f(u(x))} \dx
+	\leq \int_K L \abs{u(x)} + \abs{f(0)} \dx \\
+	= L \int_K \abs{u(x)} \dx + \abs{f(0)} \mu(K)
+	< +\infty,
+	\end{multline*}
+	because $u \in \loneloc$ and $K$ is bounded. We also have that
+	\begin{equation*}
+	\int_K \abs{h_i(x)} \dx
+	= \int_K \abs{f'(u(x)) \partial_{x_i}u} \dx
+	\leq L \int_K \abs{\partial_{x_i}u} \dx
+	< +\infty
+	\end{equation*}
+	for all $i = 1,\dots,d$, because $\partial_{x_i}u \in \loneloc$.
+\item[$a3)$] Since $C^\infty(\Omega)$ is a dense subset of
+	$W^{1,1}_\text{loc}(\Omega)$, we can find a sequence
+	$\{u_m\}$ in $C^\infty(\Omega)$ such that $u_m \to u$.
+	Explicitly, this means that $\norm{u - u_m}_{W^{1,1}} \to 0$
+	on every compact subset of $\Omega$.
+	Without loss of generality, we can even ask for $\{u_m\}$ to be
+	a.e.\ pointwise convergent to $u$ (just extract an appropriate subsequence).
+	This additional property will be useful later in order to apply
+	Lebesgue's dominated convergence theorem.
+	At this point we would like to apply the theorem given in the hint,
+	but the problem is that $f \circ u_m$ is only a $C^1$ function,
+	not $C^\infty$. Therefore out proof will not rely on it.
+\item[$a4)$] We can now check that the definition of weak derivative holds:
+	\begin{gather*}
+	\text{For all $i = 1,\dots,d$ and $\varphi \in C^\infty_0(\Omega)$,} \quad
+	\int_\Omega g(x) \partial_{x_i} \varphi(x) \dx \\
+	= \int_{\supp(\varphi)} (f(u(x)) - f(u_m(x))) \partial_{x_i} \varphi(x) \dx 
+	+ \int_{\supp(\varphi)} f(u_m(x)) \partial_{x_i} \varphi(x) \dx \\
+	= (1) - \int_{\supp(\varphi)} f'(u_m(x)) \partial_{x_i} u_m(x) \varphi(x) \dx \\
+	= (1) - \int_{\supp(\varphi)} (f'(u_m(x))\partial_{x_i}u_m(x) - h_i(x)) \varphi(x) \dx
+	      - \int_{\supp(\varphi)} h_i(x) \varphi(x) \dx \\
+	= (1) - (2) - \int_\Omega h_i(x) \varphi(x) \dx
+	\end{gather*}
+	All that's left to do is to prove that the integrals $(1)$ and $(2)$
+	vanish in the limit as $m \to \infty$.
+\item[$a5)$] Let's check the first integral:
+	\begin{gather*}
+	\lim_{m \to \infty} \abs{(1)}
+	\leq \lim_{m \to \infty} \int_{\supp(\varphi)} \abs{f(u(x)) - f(u_m(x))}
+	                         \abs{\partial_{x_i}\varphi(x)} \dx \\
+	\leq \norminf{\partial_{x_i}\varphi(x)} L
+	     \lim_{m \to \infty} \int_{\supp(\varphi)} \abs{u(x) - u_m(x)} \dx
+	= 0 \quad \text{by a3),}
+	\end{gather*}
+	because $\supp(\varphi)$ is a compact set and
+	$\norm{\cdot}_{L^1} \leq \norm{\cdot}_{W^{1,1}}$.
+	
+	Now we check the second one:
+	\begin{align*}
+	\lim_{m \to \infty} \abs{(2)}
+	& \leq \lim_{m \to \infty} \int_{\supp(\varphi)}
+	       \abs{(f'(u_m(x))\partial_{x_i}u_m(x) - f'(u(x))\partial_{x_i}u(x))}
+	       \abs{\varphi(x)} \dx \\
+	& \leq \lim_{m \to \infty} \int_{\supp(\varphi)}
+	       \abs{(f'(u_m(x))\partial_{x_i}u_m(x) - f'(u_m(x))\partial_{x_i}u(x))}
+	       \abs{\varphi(x)} \dx \\
+	& +    \lim_{m \to \infty} \int_{\supp(\varphi)}
+           \abs{(f'(u_m(x))\partial_{x_i}u(x) - f'(u(x))\partial_{x_i}u(x))}
+	       \abs{\varphi(x)} \dx \\
+	& \leq \norminf{\varphi(x)} L \lim_{m \to \infty} \int_{\supp(\varphi)}
+	       \abs{\partial_{x_i}u_m(x) - \partial_{x_i}u(x)} \dx \\
+	& +    \norminf{\varphi(x)} \lim_{m \to \infty} \int_{\supp(\varphi)}
+           \abs{(f'(u_m(x))\partial_{x_i}u(x) - f'(u(x))\partial_{x_i}u(x))} \dx \\
+    & = 0 + 0 = 0.
+	\end{align*}
+	The first limit goes to zero by a3) again.
+	The second limit goes to zero by the dominated convergence theorem,
+	whose hypothesis are satisfied by the a.e.\ pointwise convergence of $\{u_m\}$,
+	the continuity of $f'$ and the fact that $L \, \partial_{x_i} u(x)$ is integrable
+	on every compact set and dominates the sequence $\{f'(u_m(x))\partial_{x_i}u(x)\}$.
+	This completes the proof.
+
+\item[$b)$] The main idea behind this proof (as per the hint) is quite simple,
+	but making it rigorous requires a bit of effort.
+	First, we prove some properties about the $f_\varepsilon$ family of functions.
+	For each $\varepsilon > 0$, $f_\varepsilon$ is in $C^1(\R)$ because
+	\[
+	\lim_{u \to 0^+} f_\varepsilon(u)
+	= (\varepsilon^2)^{1/2}-\varepsilon = 0, \qquad
+	\lim_{u \to 0^+} f'_\varepsilon(u)
+	= \lim_{u \to 0^+} \frac{u}{\sqrt{u^2+\varepsilon^2}} = 0.
+	\]
+	Moreover, $f'_\varepsilon(u)$ is in $L^\infty(\R)$:
+	\[
+	\abs{f'_\varepsilon(u)} = \abs{\frac{u}{\sqrt{u^2+\varepsilon^2}}}
+	\leq \abs{\frac{u}{\sqrt{u^2}}} = 1
+	\]
+	
+	Since $L^2(\Omega)$ is a subset of $L^1_\text{loc}(\Omega)$,
+	both $u$ and $Du$ belong to $L^1_\text{loc}(\Omega)$ and therefore
+	we can apply the theorem in a) to get that $f_\varepsilon(u(x))$
+	has weak derivative $f'_\varepsilon(u(x)) Du(x)$.
+	However, this is not enough to prove that $f_\varepsilon(u(x))$ is in $H^1$,
+	because we still don't know if it belongs to $L^2$ or not (the same goes
+	for the weak derivative). Let's see how to fix this.
+	
+	Let $f(u) = \max\{u,0\}$. As $\varepsilon$ goes monotonically to $0$
+	($\varepsilon \searrow 0$), we have that $f_\varepsilon$ converges
+	pointwise and monotonically to $f$ ($f_\varepsilon \nearrow f$),
+	because the derivative of $f_\varepsilon(u)$ with respect
+	to $\varepsilon$ is nonpositive for every fixed $u$.
+	We also have that $f'_\varepsilon \nearrow \textbf{1}_{(0,+\infty)}$,
+	the indicator function on $(0,+\infty)$.
+	
+	Next, we turn our attention to $u^+(x)$ and
+	$v_i = \partial_{x_i} u(x) \cdot \textbf{1}_{(0,+\infty)}(u(x))$.
+	All of these functions belong to $L^2(\Omega)$, because they are truncations
+	of the $L^2$ functions $u$ and $\partial_{x_i} u$.
+	Additionally, it follows from the monotone pointwise convergence that
+	\[
+	0 \leq f_\varepsilon(u(x)) \leq u^+(x), \quad
+	0 \leq f'_\varepsilon(u(x)) \partial_{x_i} u(x)
+	\leq \textbf{1}_{(0,+\infty)}(u(x)) \partial_{x_i} u(x)
+	\]
+	for every $x$ in $\Omega$ and $\varepsilon > 0$, and this is enough
+	to prove that $f_\varepsilon(u(x))$ and
+	$f'_\varepsilon(u(x)) \partial_{x_i} u(x)$ also belong to $L^2(\Omega)$.
+	Therefore $f_\varepsilon(u(x)) \in H^1(\Omega)$ for each $\varepsilon > 0$,
+	just like we wanted.
+	
+	Now we can move on to the second half of the proof, in which we try
+	to approximate $u^+(x)$ with the sequence of $H^1$ functions $\{f_{1/n}(u(x))\}$.
+	Giving a direct proof that $\{f_{1/n}(u(x))\}$ is a Cauchy sequence is not so easy.
+	What we will do instead is prove that
+	\[
+	f_{1/n}(u(x)) \xrightarrow{L^2} u^+ \quad \text{and}	\quad
+	f'_{1/n}(u(x)) \partial_{x_i} u(x) \xrightarrow{L^2}
+	\textbf{1}_{(0,+\infty)}(u(x)) \partial_{x_i} u(x).
+	\]
+	From this, it follows that $f_{1/n}(u(x))$ and $f'_{1/n}(u(x)) \partial_{x_i} u(x)$
+	are Cauchy sequences in $L^2$, and therefore $f_{1/n}(u(x))$
+	must be a Cauchy sequence in $H^1$, as the following inequality shows:
+	\begin{gather*}
+	\normhone{ f_{1/n}(u(x))-f_{1/m}(u(x)) } \\
+	= \left( \normltwo{ f_{1/n}(u(x))-f_{1/m}(u(x)) }^2
+	+ \sum_{i=1}^d \normltwo{ f'_{1/n}(u(x)) \partial_{x_i} u(x)
+	- f'_{1/m}(u(x)) \partial_{x_i} u(x)}^2 \right)^{1/2} \\
+	\leq \normltwo{ f_{1/n}(u(x))-f_{1/m}(u(x)) }
+	+ \sum_{i=1}^d \normltwo{ f'_{1/n}(u(x)) \partial_{x_i} u(x)
+	- f'_{1/m}(u(x)) \partial_{x_i} u(x)}
+	\end{gather*}
+	The space $H^1$ is complete, so there is an element $w$ in $H^1$ to which
+	the sequence $\{f_{1/n}(u(x))\}$ converges.
+	Then, it must also converge in the $L^2$ topology,
+	and by uniqueness of limits in $L^2(\Omega)$ (a metric space) we have that
+	$w = u^+$, so we've proved that $u^+ \in H^1(\Omega)$ and
+	\[
+	f_{1/n}(u(x)) \xrightarrow{H^1} u^+(x),
+	\]
+	which in turn implies that 
+	\[
+	f'_{1/n}(u(x)) \partial_{x_i} u(x) \xrightarrow{L^2} \partial_{x_i}u^+(x)
+	\quad \text{for each $i = 1,\dots,d$.}
+	\]
+	Again, by uniqueness of limits, we get
+	$\partial_{x_i}u^+(x) = \textbf{1}_{(0,+\infty)}(u(x)) \partial_{x_i} u(x)$,
+	as was required.
+	Let us now check the aforementioned $L^2$ convergences:
+	\begin{equation*}
+	\lim_{n \to +\infty} \normltwo{f_{1/n}(u(x)) - u^+(x)}^2
+	= \lim_{n \to +\infty} \int_\Omega \left( f_{1/n}(u(x)) - u^+(x) \right)^2 \dx
+	= 0
+	\end{equation*}
+	by the dominated convergence theorem, which we can surely apply because
+	$f_{1/n}(u) \nearrow u^+$ implies
+	$\left( f_{1/n}(u(x)) - u^+(x) \right)^2 \searrow 0$
+	(hence the integrand is bounded by $0$ and $\left( f_1(u(x)) - u^+(x) \right)^2$,
+	both integrable functions on $\Omega$). This completes the proof for $u^+$.
+	
+	The proofs for $u^-$ and $\abs{u}$ now follow from the vector
+	space structure of~$H^1$ and the linearity of the weak derivative, since
+	\begin{gather*}
+	u^-(x) = \min(u(x),0) = -\max(-u(x),0) = -(-u)^+(x) \\
+	\abs{u(x)} = u^+(x) - u^-(x) = u^+(x) + (-u)^+(x). \quad \square
+	\end{gather*}
+\end{description}
+
+\section*{Exercise 3: $H^1$-estimate for the Poisson problem}
+\begin{description}
+\item[$a)$] We multiply the Poisson equation by a test function
+	$\varphi \in X = H^1_0(\Omega)$, then integrate over $\Omega$,
+	integrate by parts and use the fact that $\varphi$
+	vanishes on the boundary of the domain:
+	\begin{gather*}
+	- \int_\Omega \Delta u \varphi \dx
+	= \int_\Omega f \varphi \dx \\
+	- \int_{\partial\Omega} (\nabla u \cdot \vec{n})\varphi \dsigma
+	+ \int_\Omega \nabla u \cdot \nabla \varphi \dx
+	= \int_\Omega \nabla u \cdot \nabla \varphi \dx
+	= \int_\Omega f \varphi \dx.
+	\end{gather*}
+	Let
+	\[
+	a(u,\varphi) = \int_\Omega \nabla u \cdot \nabla \varphi \dx,
+	\quad f(\varphi) = \int_\Omega f \varphi \dx.
+	\]
+	Then the weak form of the Poisson equation is $a(u,\varphi) = f(\varphi)$.
+	In the continuous setting, the problem is:
+	\[
+	\text{Find } u \in X \text{ such that }
+	a(u,\varphi) = f(\varphi) \text{ holds for every } \varphi \in X.
+	\]
+	In the discrete setting, the problem is:
+	\[
+	\text{Find } U_h \in X_h \text{ such that }
+	a(U_h,\varphi_h) = f(\varphi_h) \text{ holds for every } \varphi_h \in X_h.
+	\]
+\item[$b)$] Since $\varphi_h$ belongs to $X_h \subset X$, we have that
+\begin{align*}
+	\int_\Omega \nabla(U_h-u) \cdot \nabla\varphi_h \dx
+	= a(U_h-u,\varphi_h)
+&	= a(U_h,\varphi_h) - a(u,\varphi_h) \\
+&	\stackrel{\text{a)}}{=} f(\varphi_h) - f(\varphi_h)
+	= 0.
+\end{align*}
+\item[$c)$] We begin by introducing some notation:
+	\begin{itemize}
+	\item $\alpha$ is the coercivity constant of the bilinear form $a(\cdot,\cdot)$
+	\item $M$ is its continuity constant
+	\item $\mathcal{T}_h$ is a triangulation of $\Omega$ with maximum diameter $h$
+	\item $a_1,\dots,a_M$ are the degrees of freedom of the triangulation
+	\item $\varphi_1,\dots,\varphi_M$ is the nodal basis corresponding to the DOF
+	\end{itemize}
+	Cea's lemma asserts that
+	\[
+	\norm{u-U_h}_1 \leq \frac{M}{\alpha} \inf_{v_h \in X_h} \norm{u-v_h}_1.
+	\]
+	The Lagrange interpolation operator is defined as the map
+	\[
+	I_h \colon X \to X_h, \quad I_h(u) = \sum_{i = 1}^M u(a_i) \varphi_i.
+	\]
+	However, pointwise evaluations of $u$ on the degrees of freedom
+	may not be well defined,
+	because functions in $X = H^{k+1}(\Omega)$ are only defined
+	up to a null set (technically, they are equivalence classes of usual functions).
+	In order to avoid this problem, we require
+	$H^{k+1}(\Omega) \subset C^0(\bar{\Omega})$, which is certainly the case
+	if $k+1 > d/2$ (by one the many Sobolev embedding theorems).
+	This explains the condition on $d$.
+	Before proving the error estimate, we need one last inequality:
+	\[
+	\norm{u - I_h(u)}_1 \leq C h^k \seminorm{u}_{k+1}.
+	\]
+	Without going into too much detail, the inequality can be proven
+	by splitting the norm into a sum over $\mathcal{T}_h$,
+	then transforming the estimate on each triangle $K$
+	to an estimate on a reference triangle $\hat{K}$
+	with the help of an affine mapping $F$ (which must not become singular
+	as h goes to 0; this is enforced by considering only regular triangulations),
+	and finally making use of the Bramble–Hilbert lemma to (indirectly) estimate
+	the interpolation error on every triangle by $h^k$ times
+	the seminorm of $u$ on $K$ (ignoring constants).
+	Now we can prove the required error estimate:
+	\begin{align*}
+	\norm{u-U_h}_1
+&	\leq \frac{M}{\alpha} \inf_{v_h \in X_h} \norm{u-v_h}_1
+	\leq \frac{M}{\alpha} \norm{u-I_h(u)}_1 \\
+&	\leq \frac{M}{\alpha} C h^k \seminorm{u}_{k+1}
+	\leq C' h^k \norm{u}_{k+1}. \quad \square
+	\end{align*}
+\end{description}
+
+\section*{Exercise 4: $L^2$-estimate for the Poisson problem}
+\begin{description}
+\item[$a)$] Let $w \in X$ be the solution to the dual problem.
+	Since $U_h - u$ also belongs to~$X$, by definition of dual problem we have that
+	\[
+	\norm{U_h-u}^2 = \langle U_h-u, U_h-u \rangle = a(w, U_h-u).
+	\]
+	The discrete solution $W_h$ is in $X_h$, so by Galerkin orthogonality
+	\[
+	a(w, U_h-u) = a(w, U_h-u) - a(U_h-u, W_h).
+	\]
+	The simmetry and linearity of $a(\cdot,\cdot)$ complete the proof.
+\item[$b)$] For each $V_h \in X_h$, we have that
+	\begin{align*}
+	\norm{U_h-u}^2
+&	= a(U_h-u, w-W_h)
+	= a(U_h-u, w-W_h) + a(U_h-u, W_h-V_h) \\
+&	= a(U_h-u, w-V_h)
+	= \langle \nabla (U_h-u), \nabla (w-V_h) \rangle_{L^2(\Omega;\R^d)} \\
+&	\leq \norm{\nabla (U_h-u)} \norm{\nabla (w-V_h)}, \text{ as required.}
+	\end{align*}
+	We have used Galerkin orthogonality and the Cauchy-Schwarz inequality.
+\item[$c)$] Since $2 > 3/2 \geq d/2$,
+	we get that $H^2(\Omega) \subset C^0(\bar{\Omega})$.
+	So the Lagrange interpolation operator $I_h$ is well-defined
+	on $w \in H^2(\Omega)$ and the following estimate holds:
+	\[
+	\norm{w-I_h(w)}_1 \leq C_1 h \norm{w}_2.
+	\]
+	Therefore
+	\begin{align*}
+	\inf_{V_h \in X_h} \norm{\nabla (w-V_h)}
+&	\leq \norm{\nabla (w-I_h(w))}
+	\leq \norm{w-I_h(w)}_1 \\
+&	\leq C_1 h \norm{w}_2
+	\leq C_2 h \norm{U_h-u}, \text{ as required.}
+	\end{align*}
+	In the last step we've used the elliptic regularity bound
+	$\norm{w}_2 \leq C \norm{U_h-u}$.
+\item[$d)$] Combining the results from 4b) and 4c) we get that
+	\[
+	\norm{U_h-u}^2 \leq C_2 h \norm{\nabla (U_h-u)} \norm{U_h-u}.
+	\]
+	Then we divide by $\norm{U_h-u}$ and use the result from 3c):
+	\[
+	\norm{U_h-u}
+	\leq C_2 h \norm{\nabla (U_h-u)}
+	\leq C_2 h \norm{U_h-u}_1
+	\leq C_3 h^{k+1} \norm{u}_{k+1}. \quad \square
+	\]
+\end{description}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

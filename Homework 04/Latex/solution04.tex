@@ -1,0 +1,218 @@
+\documentclass[a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{resizegather} \addtolength{\jot}{4pt}
+\usepackage{microtype}
+
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\DeclareMathOperator*{\argmin}{\arg\!\min}
+\DeclareMathOperator*{\argmax}{\arg\!\max}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\diver}{div}
+\DeclareMathOperator{\supp}{supp}
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand{\seminorm}[1]{\left\lvert#1\right\rvert}
+\newcommand{\dx}{\, dx \,}
+\newcommand{\dsigma}{\, d\sigma}
+\newcommand{\loneloc}{L^1_{\text{loc}}(\Omega)}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\norminf}[1]{\left\lVert#1\right\rVert_\infty}
+\newcommand{\normtwo}[1]{\left\lVert#1\right\rVert_2}
+\newcommand{\normltwo}[1]{\left\lVert#1\right\rVert_{L^2}}
+\newcommand{\normhone}[1]{\left\lVert#1\right\rVert_{H^1}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Pone}{\mathbb{P}_1}
+
+\title{\huge{Advanced Discretization Techniques \\ Homework 4}}
+\author{\Large{Bruno Degli Esposti}}
+\date{November 12th - November 19th, 2019}
+
+\begin{document}
+
+\maketitle
+
+\section*{Exercise 9: Saddle point problems (revisited)}
+\begin{description}
+\item[a)] As per the hint, we just need to check that the hypothesis of Theorem 6.12 
+	{\small[K,A]} are satisfied.
+	The bilinear form $a$ is continuous by the Cauchy-Schwarz
+	inequality. The bilinear form $b$ is continuous by Hölder's inequality and
+	the assumption that $\Omega$ has finite measure.
+	The functional $l_1$ in the right-hand side is continuous by the Cauchy-Schwarz
+	inequality and the boundedness of the trace operator.
+	The operator $B$ is defined so that the identity
+	\[
+	b(u,\mu) = \langle Bu, \mu \rangle_X = \langle Bu, \mu \rangle_\R = \mu \cdot Bu
+	\]
+	holds for any $(u,\mu) \in M \times X = H^1(\Omega) \times \R$,
+	so it's clear that
+	\[
+	Bu = \int_\Omega u \dx \quad \text{and that} \quad
+	N = \ker(B) = \left\{ u \in H^1(\Omega) \mid \int_\Omega v \dx = 0 \right\}.
+	\]
+	Now we need to check that $a$ satisfies conditions (NB1) and (NB2)
+	(defined in Theorem 6.1 {\small[K,A]}) on $N \times N$.
+	As per Remark 6.2.3, it's actually enough to show that $a$
+	is $H^1$-coercive. This follows from the Poincaré-Wirtinger inequality:
+	\begin{align*}
+	a(u,u)
+	= \frac{1}{2} \seminorm{u}_1^2 + \frac{1}{2} \seminorm{u}_1^2
+&	\geq \frac{c}{2} \norm{u - \bar{u}}_0^2 + \frac{1}{2} \seminorm{u}_1^2 \\
+&	= \frac{c}{2} \norm{u - 0}_0^2 + \frac{1}{2} \seminorm{u}_1^2
+	\geq c' \norm{u}_1^2.
+	\end{align*}
+	We have used the fact that $\bar{u}$, the integral mean of $u$, vanishes
+	(by definition) for any $u$ in $N$. To conclude the proof,
+	we will check that $\tilde{b}$ satisfies (NB2) on $\R \times N^\perp$:
+	\[
+	\inf_{\substack{\mu \in \R \\ \mu \neq 0}}
+		\sup_{\substack{u \in N^\perp \\ u \neq 0}}
+		\frac{\tilde{b}(\mu,u)}{\norm{\mu}_\R \norm{u}_1}
+	\geq \inf_{\mu} \frac{\mu \int_\Omega \sgn(\mu) \dx}{\norm{\mu}_\R \norm{\sgn(\mu)}_1}
+	= \inf_{\mu} \frac{\int_\Omega 1 \dx}{\norm{\sgn(\mu)}_0}
+	= 1 > 0.
+	\]
+	The function $u \in N^\perp$ was chosen to be constantly equal to the sign of $\mu$.
+\item[b)] This exercise can be enormously simplified by choosing a different
+	scalar product in $H^1_0(\Omega)$:
+	\[
+	\langle u,v \rangle = \int_\Omega \nabla u \cdot \nabla v \dx.
+	\]
+	By Poincaré's inequality, this scalar product is well-defined and induces
+	a norm equivalent to the usual one.
+	The continuity of $a$ and $l_2$ is trivial. The bilinear form $b$ is equal
+	to this new scalar product, so it's automatically continuous.
+	The operator $B$ is the identity on $H^1_0(\Omega)$, hence $\ker(B) = \{0\}$.
+	Since $N$ is trivial, $a$ satisfies conditions (NB1)	and (NB2) on $N \times N$
+	without any effort. The bilinear form $\tilde{b}$, as all scalar products,
+	is clearly $H^1_0$-coercive with coercivity constant 1. $\square$
+\end{description}
+
+\section*{Exercise 10: The nature of saddle point problems}
+In order to show the equivalence, $J$ will be the following Lagrange functional:
+\[
+J(v,q) = \frac{1}{2} v^T A v - f^T v + q^T (Bv-g).
+\]
+\begin{description}
+\item[$\Leftarrow)$] Let $(u,p) \in \R^n \times \R^m$ be such that
+	\[
+	J(u,p) = \max_{q \in \R^m} \min_{v \in \R^n} J(v,q).
+	\]
+	We want to prove that $(u,p)$ is a solution to the linear system. Let
+	\[
+	I(q) = \min_{v \in \R^n} J(v,q).
+	\]
+	For a given $q$, the function $J$ is quadratic in $v$ through $A$, a symmetric
+	positive definite matrix, so the minimization problem $\min_v J(v,q)$
+	has a unique solution and $I(q)$ is well defined.
+	Now we want to show that the maximization problem $\max_q I(q)$
+	also has a unique solution. This can be done by explicitly
+	calculating an expression for $I(q)$:
+	\begin{gather*}
+	I(q) = \min_{v \in \R^n} J(v,q) = J \left( \argmin_{v \in \R^n} J(v,q), q \right) \\
+	\partial_v J (v,q) = Av - f + B^Tq = 0 \quad \Leftrightarrow \quad v = A^{-1}(f - B^Tq) \\
+	\argmin_{v \in \R^n} J(v,q) = A^{-1}(f - B^Tq) \quad
+	\Rightarrow \quad I(q) = J(A^{-1}(f - B^Tq),q)
+	\end{gather*}
+	Expanding the last term, we get
+	\begin{align*}
+	I(q) &= \frac{1}{2} (A^{-1}(f - B^Tq))^T A A^{-1}(f - B^Tq)- f^T A^{-1}(f - B^Tq) \\
+&		\qquad + q^T(BA^{-1}(f - B^Tq)-g) \\
+&	= \frac{1}{2} (f^T - q^TB) A^{-1} (f - B^Tq) - f^T A^{-1} f + f^T A^{-1} B^T q \\
+&		\qquad + q^T BA^{-1} f - q^T BA^{-1}B^T q - q^T g \\
+&	= -\frac{1}{2} f^T A^{-1} f -\frac{1}{2} q^T BA^{-1}B^T q + f^T A^{-1} B^T q - q^T g.
+	\end{align*}
+	The existence and uniqueness of the maximum of $I(q)$ is given by the quadratic
+	term in $q$ through the matrix $BA^{-1}B^T$, which is positive definite thanks
+	to the rank condition on $B$:
+	\[
+	q \neq 0
+	\Rightarrow B^Tq \neq 0
+	\Rightarrow (B^Tq)^T A^{-1} B^Tq > 0
+	\Rightarrow q^T BA^{-1}B^T q > 0.
+	\]
+	Back to the main argument, what we have shown so far proves that $(u,p)$
+	is the unique solution to the $\max\min$ problem for $J$, and that
+	\begin{equation}
+	\begin{cases}
+	u = \argmin_v J(v,p) \\
+	p = \argmax_q{I(q)}.
+	\end{cases}
+	\end{equation}
+	On the one hand, equation (1u) implies that
+	\begin{equation}
+	0 = \partial_v J(u,p) = Au-f+B^Tp,
+	\end{equation}
+	and this shows that $(u,p)$ solves the first equation of the linear system.
+	On the other hand, equation (1p) implies that
+	\begin{align*}
+	0
+	= \partial_q I(p)
+&	= -BA^{-1}B^T p + B A^{-1} f - g \\
+&	= BA^{-1}(-B^T p + f) - g
+	\stackrel{(2)}{=} BA^{-1}Au - g
+	= Bu - g.
+	\end{align*}
+	This proves that $(u,p)$ also solves the second equation of the linear system.
+\item[$\Rightarrow)$] Let $(u,p)$ be a solution to the linear system.
+	We want to prove that
+	\[
+	J(u,p) = \max_{q \in \R^m} \min_{v \in \R^n} J(v,q).
+	\]
+	In the last point we have shown that the $\max\min$ problem
+	for $J$ always admits a solution, say $(\bar{v},\bar{q})$,
+	and that $(\bar{v},\bar{q})$ automatically solves the linear system.
+	All that's left to do is to show that the linear system can't have two different
+	solutions. We will do this by showing that the kernel of the block matrix is trivial.
+	Let $(w,r)$ be such that
+	\[
+	\begin{cases}
+	Aw + B^Tr = 0 \\
+	Bw = 0.
+	\end{cases}
+	\]
+	Then $w = -A^{-1}B^Tr$, which means that $0 = Bw = -BA^{-1}B^Tr$.
+	Since the matrix $BA^{-1}B^T$ is positive definite, hence invertible,
+	it follows that $r=0$, $Aw = 0$, and finally $w = 0$.
+	Now, $(u,p)=(\bar{v},\bar{q})$ and therefore
+	\[
+	J(u,p) = J(\bar{v},\bar{q}) = \max_{q \in \R^m} \min_{v \in \R^n} J(v,q). \quad \square
+	\]
+\end{description}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

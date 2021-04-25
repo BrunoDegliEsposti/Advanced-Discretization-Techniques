@@ -1,0 +1,272 @@
+\documentclass[a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{resizegather} \addtolength{\jot}{4pt}
+\usepackage{microtype}
+
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\DeclareMathOperator{\diver}{div}
+\DeclareMathOperator{\supp}{supp}
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand{\dx}{\, dx \,}
+\newcommand{\dy}{\, dy \,}
+\newcommand{\dgamma}{\, d\gamma}
+\newcommand{\dsigma}{\, d\sigma}
+\newcommand{\loneloc}{L^1_{\text{loc}}(\Omega)}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\norminf}[1]{\left\lVert#1\right\rVert_\infty}
+\newcommand{\normtwo}[1]{\left\lVert#1\right\rVert_2}
+\newcommand{\normltwo}[1]{\left\lVert#1\right\rVert_{L^2}}
+\newcommand{\normhone}[1]{\left\lVert#1\right\rVert_{H^1}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Pone}{\mathbb{P}_1}
+\newcommand{\seminorm}[1]{\left\lvert#1\right\rvert}
+
+\title{\huge{Advanced Discretization Techniques \\
+Homework 2}}
+\author{\Large{Bruno Degli Esposti}}
+\date{October 29th - November 5th, 2019}
+
+\begin{document}
+
+\maketitle
+
+\section*{Exercise 5: A different kind of element}
+\begin{description}
+\item[$a)$] Let $\{e_1,\dots,e_d\}$ be the canonical basis of $\R^d$.
+	We will first prove the statement for the case $T = \hat{T}$,
+	where $\hat{T}$ is the convex hull of the points $\{0,e_1,\dots,e_d\}$.
+	The volume of $\hat{T}$ is $1/d!$. The functions
+	\[
+	v \mapsto \int_T v(y) \dy \qquad \text{and} \qquad
+	v \mapsto \frac{1}{d!} v\left(\frac{1}{d+1},\dots,\frac{1}{d+1}\right)
+	\]
+	belong to $\Pone^*$, so in order to show that they are equal it suffices to check
+	that they agree on a basis of $\Pone$. % \subset \R[y_1,\dots,y_d]$.
+	In this proof, we will choose the monomial basis.
+	The case $v(y) = 1$ is trivial. If $v(y) = y_1$, then
+	\begin{gather*}
+	\int_T v(y) \dy
+	= \int_T y_1 \, dy_1 \dots dy_d
+	= \int_0^1 \left( \int_{L(y_1)} y_1 \, dy_2 \dots dy_d \right) \, dy_1
+	= \int_0^1 y_1 \abs{L(y_1)} \, dy_1
+	\end{gather*}
+	by Fubini's theorem, where
+	\[
+	L(y_1) = \{y_1\} \times \{(y_2,\dots,y_d) \in \R_+^{d-1}
+	\mid y_2+\dots+y_d \leq 1 - y_1\}.
+	\]
+	Now,
+	\[
+	\abs{L(y_1)} = \abs{(1-y_1)L(0)}
+	= (1-y_1)^{d-1} \abs{L(0)} = \frac{(1-y_1)^{d-1}}{(d-1)!},
+	\]
+	hence
+	\begin{gather*}
+	\int_0^1 y_1 \abs{L(y_1)} \, dy_1
+	= \frac{1}{(d-1)!} \int_0^1 y_1 (1-y_1)^{d-1} \, dy_1 \\
+	= 0 - \frac{1}{(d-1)!} \int_0^1 -\frac{(1-y_1)^d}{d} \, dy_1 
+	= \frac{1}{(d-1)!} \left[ -\frac{(1-y_1)^{d+1}}{d(d+1)} \right]_0^1 \\
+	= \frac{1}{(d+1)!}
+	= \frac{1}{d!} v\left(\frac{1}{d+1},\dots,\frac{1}{d+1}\right),
+	\end{gather*}
+	as was requested. The cases $v(y) = y_2,\dots,v(y) = y_d$
+	can be proven in the same way. Now we prove the theorem for a generic $T$.
+	Let $m \colon \hat{T} \mapsto T$ be the affine mapping sending $\hat{T}$ to $T$.
+	Then
+	\begin{gather*}
+	\int_T v(y) \dy
+	= \int_{\hat{T}} v(m(y)) \abs{\det(J_m)} \dy
+	= \abs{\det(J_m)} \int_{\hat{T}} v(m(y)) \dy \\
+	= d!\abs{T} \frac{1}{d!} \,
+		v\left(m\left(\frac{1}{d+1},\dots,\frac{1}{d+1}\right)\right)
+	= \abs{T} \, v\left( \frac{1}{d+1} \sum_{i=0}^d x_i \right)
+	\end{gather*}
+\item[$b)$] The only nontrivial condition to check is that the functions
+	$\{\sigma_0,\dots,\sigma_d\}$ are linearly independent.
+	Let $a_0,\dots,a_d \in \R$ be such that
+	\[
+	a_0 \sigma_0 + \dots + a_d \sigma_d = 0.
+	\]
+	We want to show that all $a_i$ are 0. As per the hint, we can evaluate the
+	linear combination in $\theta_i(y) = 1 - d \lambda_i(y) \in \Pone$:
+	\begin{gather*}
+	0 = \sum_{j=0}^d a_j \sigma_j(\theta_i)
+	= \sum_{j=0}^d \frac{a_j}{\abs{e_j}} \int_{e_j} \theta_i(y) \dy
+	\stackrel{a)}{=} \sum_{j=0}^d \frac{a_j}{\abs{e_j}} \abs{e_j}
+		\theta_i \left( \frac{1}{d} \sum_{k=0,k \neq j}^d x_k \right) \\
+	= \sum_{j=0}^d a_j \left(
+		1 - d \lambda_i \left(
+			\frac{1}{d} \sum_{k=0,k \neq j}^d x_k
+		\right)
+	\right)
+	= \sum_{j=0}^d a_j \delta_{ij}
+	= a_i
+	\end{gather*}
+	for all $i = 0,\dots,d$, as required for linear independence.
+\item[$c)$] Let $p_1$ and $p_2$ be the restrictions of $v_h$ to $T_1$ and $T_2$,
+	two elements sharing the face $e$. Let $e_c$ be the centroid of $e$.
+	Since $v_h$ is piecewise affine,	the size of the jump discontinuity
+	$\llbracket v_h \rrbracket$ across $e$ is given by $p_1 - p_2$, and
+	$v_h$ is continuous in $e_c$ if and only if $p_1(e_c) = p_2(e_c)$.
+	Let's prove this equality:
+	\begin{gather*}
+	0 = \int_e \llbracket v_h \rrbracket \dy
+	= \int_e p_1(y) - p_2(y) \dy \\
+	\int_e p_1(y) \dy = \int_e p_2(y) \dy
+	\stackrel{a)}{\Rightarrow} \abs{e} p_1(e_c) = \abs{e} p_2(e_c)
+	\Rightarrow p_1(e_c) = p_2(e_c). \quad \square
+	\end{gather*}
+\end{description}
+
+\section*{Exercise 6: A different kind of elliptic equation}
+\begin{description}
+\item[$a)$] We multiply the equation by a test function
+	$\varphi \in X = H^2_0(\Omega)$, then integrate over $\Omega$,
+	integrate by parts twice and use the fact that both $\varphi$
+	and 	$\nabla \varphi$ vanish on the boundary of the domain:
+	\begin{gather*}
+	\int_\Omega \Delta^2 u \, \varphi \dx
+	= \int_\Omega f \varphi \dx \\
+	\int_{\partial \Omega} (\nabla (\Delta u) \cdot \vec{n}) \, \varphi \dsigma
+	-\int_\Omega \nabla (\Delta u) \cdot \nabla \varphi \dx
+	= \int_\Omega f \varphi \dx \\
+	-\int_{\partial \Omega} \Delta u \, (\nabla \varphi \cdot \vec{n}) \dsigma
+	+\int_\Omega \Delta u \, \Delta \varphi \dx
+	= \int_\Omega f \varphi \dx \\
+	\int_\Omega \Delta u \, \Delta \varphi \dx
+	= \int_\Omega f \varphi \dx. \\
+	\end{gather*}
+	Let
+	\[
+	a(u,\varphi) = \int_\Omega \Delta u \, \Delta \varphi \dx,
+	\quad f(\varphi) = \int_\Omega f \varphi \dx.
+	\]
+	Then the weak form of the equation is $a(u,\varphi) = f(\varphi)$.
+	In the continuous setting, the problem is:
+	\[
+	\text{Find } u \in X \text{ such that }
+	a(u,\varphi) = f(\varphi) \text{ holds for every } \varphi \in X.
+	\]
+	The system is not overconstrained because the weak gradient of every
+	function in $H_0^2$ vanishes on the boundary (has trace 0),
+	so the boundary condition $Du = 0$ is quite natural.
+	Otherwise, by just asking for $u=0$ we would have to work
+	in $H_0^1(\Omega) \cap H^2(\Omega)$, but then we can't integrate
+	by parts a second time without introducing an unwanted extra term.
+\item[$b)$] The first half of the proof boils down to Schwarz's theorem
+	and integration by parts. Indeed, for each $\varphi \in C_0^\infty(\Omega)$,
+	we have that
+	\begin{gather*}
+	\int_\Omega (\Delta\varphi(x))^2 \dx
+	= \int_\Omega \big( \sum_{i=1}^d \partial_{x_i x_i} \varphi(x) \big)^2 \dx
+	= \int_\Omega \sum_{i,j=1,\dots,d} \partial_{x_i x_i} \varphi(x) \,
+	                                   \partial_{x_j x_j} \varphi(x) \dx \\
+	= \int_\Omega \sum_{i,j=1,\dots,d} \partial_{x_i} \varphi(x) \,
+	                                   \partial_{x_j x_j x_i} \varphi(x) \dx
+	= \int_\Omega \sum_{i,j=1,\dots,d} \partial_{x_i} \varphi(x) \,
+	                                   \partial_{x_i x_j x_j} \varphi(x) \dx \\
+	= \int_\Omega \sum_{i,j=1,\dots,d} \partial_{x_i x_j} \varphi(x) \,
+	                                   \partial_{x_i x_j} \varphi(x) \dx
+	= \int_\Omega \sum_{\abs{\alpha}=2} \big( \partial_{x^\alpha} \varphi(x) \big)^2 \dx
+	= \seminorm{\varphi}_2^2.
+	\end{gather*}
+	The second half of the proof follows by the density of
+	$\varphi \in C_0^\infty(\Omega)$ in $H_0^2(\Omega)$ and the continuity
+	of the two functionals, which is readily checked:
+	\begin{align*}
+	\int_\Omega (\Delta\varphi(x))^2 \dx
+&	= \int_\Omega \big( \sum_{i=1}^d \partial_{x_i x_i} \varphi(x) \big)^2 \dx \\
+&	\leq d \int_\Omega \sum_{i=1}^d \big( \partial_{x_i x_i} \varphi(x) \big)^2 \dx
+	\leq d \seminorm{\varphi}_2^2
+	\leq d \norm{\varphi}_2^2.
+	\end{align*}
+	The first inequality is just the usual AM-QM inequality.
+\item[$c)$] We derive the following inequality, which will be useful in point d):
+	\[
+	\exists C > 0 \text{ such that }
+	\seminorm{u}_2^2 \geq C \norm{u}_2^2 \text{ for each } u \in H_0^2(\Omega).
+	\]
+	The proof relies on the fact that weak derivatives of functions in $H_0^2(\Omega)$
+	belong to $H_0^1(\Omega)$, so the basic version of Poincaré's inequality
+	still applies to them: there exist constants $c,c_1,\dots,c_d > 0$ such that
+	\[
+	\normltwo{u}^2 \leq c \seminorm{u}_1^2 \text{ and }
+	\normltwo{\partial_{x_i} u}^2 \leq c_i \seminorm{\partial_{x_i} u}_1^2
+	\text{ for each } i = 1,\dots,d.
+	\]
+	From now on, it's just algebra:
+	\begin{gather*}
+	\normltwo{u}^2
+	\leq c \seminorm{u}_1^2
+	= c \normltwo{\nabla u}^2
+	= c \sum_{i=1}^d \normltwo{\partial_{x_i} u}^2
+	\leq c \sum_{i=1}^d c_i \seminorm{\partial_{x_i} u}_1^2 \\
+	= c \sum_{i=1}^d c_i \normltwo{\nabla \partial_{x_i} u}^2
+	\leq c' \sum_{i,j=1}^d \normltwo{\partial_{x_i x_j} u}^2
+	= c' \seminorm{u}_2^2.
+	\end{gather*}
+	Comparing the first, second and last terms we get that
+	\[
+	\norm{u}_2^2
+	= \normltwo{u}^2 + \seminorm{u}_1^2 + \seminorm{u}_2^2
+	\leq \left( c' + \frac{c'}{c} + 1 \right) \seminorm{u}_2^2
+	= c'' \seminorm{u}_2^2,
+	\]
+	so we can just choose $C = 1/c''$.
+\item[$d)$] Existence and uniqueness of a weak solution $u \in X$ is given by
+	the Lax-Milgram theorem applied to the equation $a(u,v)=f(v)$.
+	Let's check that the hypothesis are satisfied.
+	The continuity of $f$ is given by $f \in X^*$.
+	The continuity of $a(\cdot,\cdot)$ follows from the Cauchy-Schwarz inequality
+	and point~b):
+	\begin{gather*}
+	a(u,v)
+	= \int_\Omega \Delta u \, \Delta v \dx
+	\leq \left( \int_\Omega (\Delta u)^2 \dx \right)^{1/2}
+	     \left( \int_\Omega (\Delta v)^2 \dx \right)^{1/2} \\
+	= \seminorm{u}_2 \seminorm{v}_2
+	\leq \norm{u}_2 \norm{v}_2.
+	\end{gather*}
+	The coercivity of $a(\cdot,\cdot)$ follows from points b) and c):
+	\begin{gather*}
+	a(u,u) = \int_\Omega (\Delta u)^2 \dx = \seminorm{u}_2^2 \geq C \norm{u}_2^2. \quad \square
+	\end{gather*}
+\end{description}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
