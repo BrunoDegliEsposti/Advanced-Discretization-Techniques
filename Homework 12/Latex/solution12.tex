@@ -1,0 +1,211 @@
+\documentclass[a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[fleqn]{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{enumitem}
+\usepackage{resizegather} \addtolength{\jot}{4pt}
+\usepackage{microtype}
+
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\DeclareMathOperator*{\argmin}{\arg\!\min}
+\DeclareMathOperator*{\argmax}{\arg\!\max}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\diver}{div}
+\DeclareMathOperator{\supp}{supp}
+\newcommand{\dx}{\, dx \,}
+\newcommand{\dy}{\, dy \,}
+\newcommand{\dt}{\, dt \,}
+\newcommand{\ds}{\, ds \,}
+\newcommand{\dxdy}{\, dx \:\! dy \,}
+\newcommand{\dvecx}{\, d\vec{x} \,}
+\newcommand{\dsigma}{\, d\sigma \,}
+\newcommand{\area}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\seminorm}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\dpair}[1]{\left\langle #1 \right\rangle}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\C}{\mathbb{C}}
+\renewcommand{\Re}{\operatorname{Re}}
+\renewcommand{\Im}{\operatorname{Im}}
+
+\title{\huge{Advanced Discretization Techniques \\ Homework 12}}
+\author{\Large{Bruno Degli Esposti, Xingyu Xu}}
+\date{January 21st - January 28th, 2020}
+
+\begin{document}
+
+\maketitle
+
+\section*{Exercise 22: Fully discrete error estimate}
+\begin{enumerate}[label=\textbf{\alph*)},leftmargin=*]
+\item For any fixed time $t$, consider the following elliptic boundary
+	value problem in weak form:
+	\[
+	\text{Find } w \in V \text{ such that } a(w,v) = a(u(t),v) \text{ for each } v \in V.
+	\]
+	Of course, $w = u(t)$ is a solution, and it's actually unique
+	because of Lax-Milgram's lemma. On the other hand, the finite
+	element solution of the problem will be some $w_h \in V_h$
+	such that $a(w_h,v_h) = a(u(t),v_h)$ for each $v_h \in V_h$,
+	and we must then have $w_h = R_h u(t)$ by the definition of $R_h$.
+	Now, the Aubin/Nitsche theorem (3.37 in the book by Knabner and Angermann,
+	inequality (3)) gives us exactly what we need to prove:
+	\[
+	\norm{u(t) - R_h u(t)}_0 \leq C h^2 \seminorm{u(t)}_2
+	\]
+	However, we still need to check that the hypothesis of the theorem hold.
+	In particular, we need to check that the adjoint boundary value problem
+	is regular. As $a(\cdot,\cdot)$ is symmetric, the adjoint boundary value problem
+	is the same as the original one. Regularity follows from
+	Lax-Milgram's lemma and the elliptic regularity estimate
+	\[
+	\seminorm{u(t)}_2 \leq C \norm{a(u(t),\cdot)}.
+	\]
+	The proof of this estimate can be found in Evans' book on partial
+	differential equations (see theorem 4, chapter 6.3, page 317).
+\item By point a) and the fundamental theorem of calculus for Bochner integrals,
+	it follows that
+	\[
+	\norm{u(t_n) - R_h u(t_n)}_0
+	\leq C h^2 \seminorm{u(t_n)}_2
+	= C h^2 \seminorm{u_0 + \int_0^{t_n} \partial_t u(t) \dt}_2.
+	\]
+	Then, by the triangle inequality (once for sums, once for integrals),
+	\begin{align*}
+	C h^2 \seminorm{u_0 + \int_0^{t_n} \partial_t u(t) \dt}_2
+&	\leq Ch^2\left(|u_0|_2+\left|\int^{t_n}_0\partial_tu(t)\dt\right|_2\right) \\
+&	\leq Ch^2 \left( \seminorm{u_0}_2
+		+ \int_0^{t_n} \seminorm{\partial_t u(t)}_2 \dt \right) \\
+&	= Ch^2\left(\|\partial_{xx}u_0\|_0+\int^{t_n}_0\|\partial_{t,xx}u(t)\|_0\dt\right).
+	\end{align*}
+\item By the definitions of $\theta_n$, implicit Euler scheme and Ritz-projection,
+	we can prove the following chain of equalities:
+	\begin{gather*}
+	\left(\frac{\theta_n-\theta_{n-1}}{\tau_{n-1}},v_h\right)_0
+	  + a(\theta_n,v_h) \\
+	= \left(\frac{R_h u(t_n)-U^n-R_h u(t_{n-1})+U^{n-1}}{\tau_{n-1}},v_h\right)_0
+	  + a(R_h u(t_n)-U^n,v_h) \\
+	\begin{split} = \left(\frac{R_h u(t_n)-R_h u(t_{n-1})}{\tau_{n-1}},v_h\right)_0
+	  &+ a(R_h u(t_n),v_h) \\[-4pt]
+	  &- \left(\frac{U^n-U^{n-1}}{\tau_{n-1}},v_h\right)_0
+	  - a(U^n,v_h) \end{split} \\
+	= \left(\frac{R_h u(t_n)-R_h u(t_{n-1})}{\tau_{n-1}},v_h\right)_0
+	  + a(R_h u(t_n),v_h) - (f^n,v_h)_0 \\
+	= \left(\frac{R_h u(t_n)-R_h u(t_{n-1})}{\tau_{n-1}},v_h\right)_0
+	  + a(u(t_n),v_h) - (f^n,v_h)_0.
+	\end{gather*}
+	Since $u(t)$ solves the weak formulation of the problem,
+	we can choose $v_h$ as a test function and get that
+	$(\partial_t u(t_n), v_h)_0 + a(u(t_n),v_h) = (f^n,v_h)_0$. Then,
+	\begin{gather*}
+	\left(\frac{R_h u(t_n)-R_h u(t_{n-1})}{\tau_{n-1}},v_h\right)_0
+		+ a(u(t_n),v_h) - (f^n,v_h)_0 \\
+	= \left(\frac{R_h u(t_n)-R_h u(t_{n-1})}{\tau_{n-1}},v_h\right)_0
+		- (\partial_t u(t_n), v_h)_0.
+	\end{gather*}
+\item In point c), we've essentially proved that $\theta_i$ satisfies
+	an implicit Euler scheme with right-hand side $-\omega_i^1-\omega_i^2$:
+	\begin{gather*}
+	\frac{R_h u(t_i)-R_h u(t_{i-1})}{\tau_{i-1}} - \partial_t u(t_i) \\
+	= \frac{R_h u(t_i) -u(t_i) +u(t_i) -u(t_{i-1}) +u(t_{i-1}) -R_h u(t_{i-1})}
+		{\tau_{i-1}} - \partial_t u(t_i) \\
+	= - \left( \partial_t u(t_i) - \frac{u(t_i)-u(t_{i-1})}{\tau_{i-1}} \right)
+	  - \left( \frac{u(t_i) - R_h u(t_i)}{\tau_{i-1}}
+	         - \frac{u(t_{i-1}) - R_h u(t_{i-1})}{\tau_{i-1}} \right).
+	\end{gather*}
+	Therefore, the fully discrete estimate from Exercise 21 tells us that
+	\[
+	\|\theta_n\|_0-\|\theta_0\|_0\leq\sum^{n}_{i=1}\tau_{i-1}\|-\omega^1_i-\omega^2_i\|_0,
+	\]
+	and then it follows by the triangle inequality and the definition of $\tau$ that
+	\[
+	\norm{\theta_n}_0
+	\leq \norm{\theta_0}_0 + \tau\sum_{i=1}^n \norm{\omega_i^1 + \omega_i^2}_0
+	\leq \norm{\theta_0}_0 + \tau\sum_{i=1}^n \norm{\omega_i^1}_0
+		+ \tau\sum_{i=1}^n \norm{\omega_i^2}_0.
+	\]
+\item Taylor's formula with remainder in integral form gives us that
+	\[
+	u(t_{i-1})
+	= u(t_i-\tau_{i-1})
+	= u(t_i) + \partial_t u(t_i)(-\tau_{i-1})
+		+ \int_{t_{i-1}}^{t_i} \partial_{tt} u(t) (t-t_{i-1}) \dt,
+	\]
+	therefore
+	\begin{align*}
+	\norm{\omega_i^1}_0
+&	= \norm{\partial_t u(t_i)-\frac{u(t_i)-u(t_{i-1})}{\tau_{i-1}}}_0 \\
+&	= \norm{\int_{t_{i-1}}^{t_i} \partial_{tt} u(t) \frac{t-t_{i-1}}{\tau_{i-1}} \dt}_0
+	\leq \int_{t_{i-1}}^{t_i}
+		\norm{\partial_{tt} u(t) \frac{t-t_{i-1}}{\tau_{i-1}}}_0 \dt \\
+&	\leq \int_{t_{i-1}}^{t_i} \norm{\partial_{tt} u(t)}_0
+		\frac{t_i-t_{i-1}}{\tau_{i-1}} \dt
+	= \int_{t_{i-1}}^{t_i} \norm{\partial_{tt} u(t)}_0 \dt. \\
+	\tau \sum_{i=1}^n \norm{\omega_i^1}_0
+&	= \tau \sum_{i=1}^n \int_{t_{i-1}}^{t_i} \norm{\partial_{tt} u(t)}_0 \dt
+	= \tau \int_0^{t_n} \norm{\partial_{tt} u(t)}_0 \dt.
+	\end{align*}
+\item By the fundamental theorem of calculus and point a) (which can be proved for
+	$\partial_t u(t)$ as well, since $\partial_t u(t) \in H^2(0,1)$), we have that
+	\begin{align*}
+	\|\omega^2_i\|_0
+&	= \norm{ \int^{t_i}_{t_{i-1}} \partial_t
+		\left( \frac{u(t)-R_h(u(t))}{\tau_{i-1}} \right) \dt}_0 \\
+&	= \norm{ \int^{t_i}_{t_{i-1}} 
+		\left( \frac{\partial_t u(t)-R_h(\partial_t u(t))}{\tau_{i-1}} \right) \dt}_0 \\
+&	\leq \int^{t_i}_{t_{i-1}} 
+		 \frac{\norm{\partial_t u(t)-R_h(\partial_t u(t))}_0} {\tau_{i-1}} \dt \\
+&	\leq\int^{t_i}_{t_{i-1}} \frac{Ch^2|\partial_t u(t)|_2}{\tau_{i-1}} \dt
+	=\int^{t_i}_{t_{i-1}}\frac{Ch^2}{\tau_{i-1}}\|\partial_{t,xx}u(t)\|_0 \dt.
+	\end{align*}
+	If we now sum both sides for $i = 1,\dots,n$ and multiply them by $\tau$,
+	we end up with
+	\[
+	\tau\sum^n_{i=1}\|\omega^2_i\|_0
+	\leq\frac{\tau}{\min_{i=0,\dots,N-1}\tau_i}
+		Ch^2\int^{t_n}_0\|\partial_{t,xx}u(t)\|_0 \dt
+	\leq \tilde{C} h^2\int^{t_n}_0\|\partial_{t,xx}u(t)\|_0 \dt
+	\]
+	We've made the assumption that the time discretization is quasi-uniform.
+\item By the triangle inequality and the definition of $\theta_n$,
+	\[
+	\|u(t_n)-U^n\|_0
+	=\|u(t_n)-R_hu(t_n)+\theta_n\|_0\leq\|u(t_n)-R_hu(t_n)\|_0+\|\theta_n\|_0.
+	\]
+	Then, by points b) and d), it follows that
+	\begin{multline*}
+	\|u(t_n)-R_hu(t_n)\|_0+\|\theta_n\|_0
+	\leq Ch^2\left(\|\partial_{xx}u_0\|_0+\int^{t_n}_0\|\partial_{t,xx}u(t)\|_0 \dt\right) \\
+	+\norm{\theta_0}_0
+	+\tau\sum^n_{i=1}\|\omega^1_i\|_0+\tau\sum^n_{i=1}\|\omega^2_i\|_0.
+	\end{multline*}
+	The term $\norm{\theta_0}_0$ vanishes because $R_h u(0) - U^0 = 0$ by assumption,
+	and finally we can conclude the proof using the results from points e) and f):
+	\begin{gather*}
+	\|u(t_n)-U^n\|_0 \\
+	\leq Ch^2\left(\|\partial_{xx}u_0\|_0
+			+2\int^{t_n}_0\|\partial_{t,xx}u(t)\|_0dt\right)
+			+\tau\int^{t_n}_0\|\partial_{tt}u(t)\|_0 \dt \\
+	\leq 2Ch^2\left(\|\partial_{xx}u_0\|_0+\int^{t_n}_0\|\partial_{t,xx}u(t)\|_0dt\right)
+		+\tau\int^{t_n}_0\|\partial_{tt}u(t)\|_0 \dt. \quad \square
+	\end{gather*}
+\end{enumerate}
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+

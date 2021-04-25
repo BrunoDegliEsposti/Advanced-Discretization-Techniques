@@ -1,0 +1,147 @@
+\documentclass[a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{enumitem}
+\usepackage{resizegather} \addtolength{\jot}{4pt}
+\usepackage{microtype}
+
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\DeclareMathOperator*{\argmin}{\arg\!\min}
+\DeclareMathOperator*{\argmax}{\arg\!\max}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\diver}{div}
+\DeclareMathOperator{\supp}{supp}
+\newcommand{\dx}{\, dx \,}
+\newcommand{\dy}{\, dy \,}
+\newcommand{\dxdy}{\, dx \:\! dy \,}
+\newcommand{\dvecx}{\, d\vec{x} \,}
+\newcommand{\dsigma}{\, d\sigma \,}
+\newcommand{\area}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\seminorm}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\dpair}[1]{\left\langle #1 \right\rangle}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+
+\title{\huge{Advanced Discretization Techniques \\ Homework 9}}
+\author{\Large{Bruno Degli Esposti, Xingyu Xu}}
+\date{December 17th 2019 - January 7th 2020}
+
+\begin{document}
+
+\maketitle
+
+\section*{Exercise 18: A FV scheme for a nonlinear equation (Part II)}
+\begin{enumerate}[label=\textbf{\alph*)},leftmargin=*]
+
+ \item Since $u_\mathcal{T}(x)$ is a piecewise constant function, $\|u_\mathcal{T}(x)\|_{L^2(\mathbb{R})}$ can be computed in the following way:
+ $$
+ \|u_\mathcal{T}(x)\|^2_{L^2(\mathbb{R})}=U_1^2h_1+U_2^2h_2+\cdots+U_N^2h_n.
+ $$
+ By Ex.17 c),
+ $$
+ \|u_\mathcal{T}(x)\|^2_{L^2(\mathbb{R})}\leq C(h_1+h_2+\cdots+h_n)=C.
+ $$
+ And the boundedness of $u_\mathcal{T}$ is thus proved.
+ \item Since $u_\mathcal{T}(x)$ is a piecewise constant function, we may assume that $u_\mathcal{T}(x+\eta)=U_{i+j}$ and $u_\mathcal{T}(x)=U_i$, where $1\leq i,i+j\leq N$.
+ \begin{align*}
+(u_\mathcal{T}(x+\eta)-u_\mathcal{T}(x))^2&=(U_{i+j}-U_i)^2\\
+                                          &\leq(|U_{i+j}-U_{i+j-1}|+|U_{i+j-1}-U_{i+j-2}|+\cdots+|U_{i+1}-U_i|)^2\\
+                                          &\leq\left(\sum^N_{i=0}|U_{i+1}-U_i|\right)^2\\
+                                          &\leq???\left(\sum^N_{i=0}|U_{i+1}-U_i|\chi_{i+\frac{1}{2}}(x)\right)^2\\
+                                          &\leq\left(\sum^N_{i=0}\frac{(U_{i+1}-U_i)^2}{h_{i+\frac{1}{2}}}\chi_{i+\frac{1}{2}}(x)\right)\left(\sum^N_{i=0}\chi_{i+\frac{1}{2}}(x)h_{i+\frac{1}{2}}\right)
+ \end{align*}
+
+ \item $\sum\limits_{i=0}^N\chi_{i+\frac{1}{2}}(x)h_{i+\frac{1}{2}}\leq\eta+2h$???
+
+
+
+ \item By c) and the condition $\eta+2h\leq3$, we have
+ $$
+ \|\frac{u_{\mathcal{T}_n}(\cdot+\eta)-u_{\mathcal{T}_n}}{\eta}\|^2_{0,\mathbb{R}}\leq3C.
+ $$
+ Since $\lim\limits_{n\to\infty}u_{\mathcal{T}_n}=u\in L^2(\mathbb{R})$, and noticing that the right hand side of the above inequality is a constant, we have
+ $$
+ \|\frac{u(\cdot+\eta)-u}{\eta}\|^2_{0,\mathbb{R}}\leq3C,
+ $$
+ and furthermore
+ $$
+ \|\lim_{\eta\to 0}\frac{u(\cdot+\eta)-u}{\eta}\|^2_{0,\mathbb{R}}\leq3C.
+ $$
+ The boundedness of $\Delta_\eta u$ is thus proved.
+
+ \item Multiplying the equation (A) in Ex.17 of the discretized FV scheme by $\varphi_i$, we get
+ $$
+ (\mathcal{F}_{i+\frac{1}{2}}-\mathcal{F}_{i-\frac{1}{2}})\varphi_i=h_if_i(U_i)\varphi_i,\quad i=1,\cdots,N
+ $$
+ By the conditions $\mathcal{F}_{i+\frac{1}{2}}=-\frac{U_{i+1}-U_i}{h_{i+\frac{1}{2}}},\quad i=1,\cdots,N$ and $U_0=U_{N+1}=0$, we have further that:
+ $$
+ \sum^N_{i=1}\left(-\frac{U_{i+1}-U_i}{h_{i+\frac{1}{2}}}-\left(-\frac{U_i-U_{i-1}}{h_{i-\frac{1}{2}}}\right)\right)\varphi_i=\sum^N_{i=1}f_i\varphi_ih_i
+ $$
+ Noticing that the l.h.s. can be rewritten as
+ \begin{align*}
+ \sum^N_{i=1}\left(-\frac{U_{i+1}-U_i}{h_{i+\frac{1}{2}}}-\left(-\frac{U_i-U_{i-1}}{h_{i-\frac{1}{2}}}\right)\right)\varphi_i&=\sum^N_{i=1}\left(\frac{\varphi_i-\varphi_{i-1}}{h_{i-\frac{1}{2}}}-\frac{\varphi_{i+1}-\varphi_i}{h_{i+\frac{1}{2}}}\right)u_i\\
+                                                                                                                             &=\sum^N_{i=1}\frac{1}{h_i}\left(\frac{\varphi_i-\varphi_{i-1}}{h_{i-\frac{1}{2}}}-\frac{\varphi_{i+1}-\varphi_i}{h_{i+\frac{1}{2}}}\right)u_ih_i
+ \end{align*}
+ Then we get
+ $$
+ \int^1_0u_\mathcal{T}\psi_\mathcal{T}dx=\sum^N_{i=1}\frac{1}{h_i}\left(\frac{\varphi_i-\varphi_{i-1}}{h_{i-\frac{1}{2}}}-\frac{\varphi_{i+1}-\varphi_i}{h_{i+\frac{1}{2}}}\right)u_ih_i=\sum^N_{i=1}f_i\varphi_ih_i=\int^1_0f_\mathcal{T}\varphi_\mathcal{T}dx
+ $$
+ \item Since $\varphi$ is by definition a smooth function, we have
+ $$
+ \frac{\varphi_{i+1}-\varphi_i}{h_{i+\frac{1}{2}}}=\varphi^\prime(x_{i+\frac{1}{2}})+R_{i+\frac{1}{2}},
+ $$
+ where $R_{i+\frac{1}{2}}$ is a remainder term. Then
+ \begin{align*}
+ \int^1_0u_\mathcal{T}(x)\psi_\mathcal{T}(x)dx&=\sum^N_{i=1}\int_{\Omega_i}\frac{U_i}{h_i}(\varphi^\prime(x_{i-\frac{1}{2}})-\varphi^\prime(x_{i+\frac{1}{2}}))dx+\sum^N_{i=1}U_i(R_{i-\frac{1}{2}}-R_{i+\frac{1}{2}})\\
+                                              &=\int^1_0-u_\mathcal{T}(x)\theta_\mathcal{T}(x)dx+\sum^N_{i=0}R_{i+\frac{1}{2}}(U_{i+1}-U_i).
+ \end{align*}
+
+ \item By the regularity of $\varphi$ again, we have
+ $$
+ \frac{\varphi^\prime(x_{i+\frac{1}{2}})-\varphi^\prime(x_{i-\frac{1}{2}})}{h_i}=\varphi''(x_i)+R_i^\prime.
+ $$
+ Define $\varphi''(x):=\sum\limits^N_{i=1}\varphi''(x_i)\chi_{\Omega_i}(x)$, then
+ $$
+ \int^1_0-u_\mathcal{T}(x)\theta_\mathcal{T}(x)dx=\int^1_0-u_\mathcal{T}(x)\varphi''(x)dx+\sum^N_{i=1}U_iR_i^\prime. \eqno(1)
+ $$
+ If $h\to 0$, i.e. $n\to\infty$, then $R_i^\prime, R_{i-\frac{1}{2}}\to 0$ for all $i\in\mathbb{N}$ and $u_{\mathcal{T}_n}\to u, f_{\mathcal{T}_n}\to f$, moreover by the conclusions of f) and (1), we get the limiting case of conclusion e):
+ $$
+ -\int^1_0u(x)\varphi''(x)dx=\int^1_0f(x,u(x))\varphi(x)dx.
+ $$
+\end{enumerate}
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,185 @@
+\documentclass[a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{enumitem}
+\usepackage{resizegather} \addtolength{\jot}{4pt}
+\usepackage{microtype}
+
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\DeclareMathOperator*{\argmin}{\arg\!\min}
+\DeclareMathOperator*{\argmax}{\arg\!\max}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\diver}{div}
+\DeclareMathOperator{\supp}{supp}
+\newcommand{\dx}{\, dx \,}
+\newcommand{\dy}{\, dy \,}
+\newcommand{\dt}{\, dt \,}
+\newcommand{\ds}{\, ds \,}
+\newcommand{\dxdy}{\, dx \:\! dy \,}
+\newcommand{\dvecx}{\, d\vec{x} \,}
+\newcommand{\dsigma}{\, d\sigma \,}
+\newcommand{\area}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\seminorm}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\dpair}[1]{\left\langle #1 \right\rangle}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+
+\title{\huge{Advanced Discretization Techniques \\ Homework 10}}
+\author{\Large{Bruno Degli Esposti, Xingyu Xu}}
+\date{January 7th - January 14th, 2020}
+
+\begin{document}
+
+\maketitle
+
+\section*{Exercise 19: Estimates for parabolic equations}
+\begin{enumerate}[label=\textbf{\alph*)},leftmargin=*]
+\item We first prove a stronger, differential version of the inequality.
+	If $\norm{u(t)}_0 = 0$, then we're already done.
+	Otherwise, by the usual theorem for differentiation
+	under the (Lebesgue) integral sign,
+	\[
+	\frac{d}{dt} \norm{u(t)}_0
+	= \frac{d}{dt} \dpair{u(t),u(t)}^{1/2}
+	= \frac{2 \dpair{u'(t),u(t)}_0} {2 \norm{u(t)}_0}
+	= \frac{\dpair{u'(t),u(t)}_0} {\norm{u(t)}_0}.
+	\]
+	For $v = u(t)$, the last numerator is equal to the first integral in the
+	weak formulation of the boundary value problem, so we get
+	\[
+	\frac{\dpair{u'(t),u(t)}_0} {\norm{u(t)}_0}
+	= \frac{\int_\Omega u'(t) u(t) \dx} {\norm{u(t)}_0}
+	= \frac{\int_\Omega f(t) u(t) \dx - a(u(t),u(t))} {\norm{u(t)}_0}.
+	\]
+	By the positive definiteness of the bilinear form $a(\cdot,\cdot)$
+	and Cauchy-Schwarz's inequality, we can conclude that
+	\[
+	\frac{\int_\Omega f(t) u(t) \dx - a(u(t),u(t))} {\norm{u(t)}_0}
+	\leq \frac{\int_\Omega f(t) u(t) \dx} {\norm{u(t)}_0}
+	\leq \frac{\norm{f(t)}_0 \norm{u(t)}_0} {\norm{u(t)}_0}
+	= \norm{f(t)}_0.
+	\]
+	Now we can integrate the differential version of the inequality over time:
+	\begin{align*}
+	\int_0^s \frac{d}{dt} \norm{u(t)}_0 \dt
+&	\leq \int_0^s \norm{f(t)}_0 \dt \\
+	\norm{u(s)}_0
+&	\leq \norm{u(0)}_0 + \int_0^s \norm{f(t)}_0 \dt.
+	\end{align*}
+\item Again, we first prove a stronger, differential version of the inequality.
+	By Poincaré's inequality in $H_0^1(\Omega)$, there exists a constant $C_1 > 0$
+	independent of $t$ such that
+	\[
+	\norm{u(t)}_0^2 \leq C_1^2 \seminorm{u(t)}_1^2
+	\]
+	holds for all $u(t) \in H^1(0,T;V)$.	Then, taking $v = 2u(t)$, it follows that
+	\begin{align*}
+	\frac{d}{dt} \norm{u(t)}_0^2
+&	= \dpair{u'(t),2u(t)}_0 \\
+&	= \dpair{f(t),2u(t)}_0 - a(u(t),2u(t)) \\
+&	= \int_\Omega 2f(t)u(t) \dx - \seminorm{u(t)}_1^2 - \seminorm{u(t)}_1^2 \\
+&	\leq \int_\Omega 2f(t)u(t) \dx - C_1^{-2} \norm{u(t)}_0^2 - \seminorm{u(t)}_1^2 \\
+&	= \int_\Omega C_1^2 f(t)^2 \dx
+		- \int_\Omega \big( C_1 f(t) - C_1^{-1} u(t) \big)^2 \dx
+		- \seminorm{u(t)}_1^2 \\
+&	\leq C_1^2 \norm{f(t)}_0^2 - \seminorm{u(t)}_1^2.
+	\end{align*}
+	In the last steps, we've completed the square and discarded a negative term.
+	Now we can integrate the differential version of the inequality over time:
+	\begin{gather*}
+	\int_0^s \frac{d}{dt} \norm{u(t)}_0^2 \dt
+	\leq \int_0^s C_1^2 \norm{f(t)}_0^2 \dt - \int_0^s \seminorm{u(t)}_1^2 \dt \\
+	\norm{u(s)}_0^2 - \norm{u(0)}_0^2
+	\leq C_1^2 \int_0^s \norm{f(t)}_0^2 \dt - \int_0^s \seminorm{u(t)}_1^2 \dt \\
+	\norm{u(s)}_0^2 + \int_0^s \seminorm{u(t)}_1^2 \dt
+	\leq \norm{u(0)}_0^2 + C_1^2 \int_0^s \norm{f(t)}_0^2 \dt
+	\end{gather*}
+\item The proof is very similar to the one of point b).
+	The only differences are that this time we choose $v = 2u'(t)$
+	and use the symmetry of $a(\cdot,\cdot)$:
+	\begin{align*}
+	\frac{d}{dt} \seminorm{u(t)}_1^2
+&	= \frac{d}{dt} a(u(t),u(t))
+	= a(u(t),2u'(t)) \\
+&	= \int_\Omega 2f(t)u'(t) \dx - \int_\Omega u'(t)^2 \dx - \int_\Omega u'(t)^2 \dx \\
+&	= \int_\Omega f(t)^2 \dx - \int_\Omega (f(t)-u'(t))^2 \dx - \int_\Omega u'(t)^2 \dx \\
+&	\leq \int_\Omega f(t)^2 \dx - \int_\Omega u'(t)^2 \dx
+	= \norm{f(t)}_0^2 - \norm{u'(t)}_0^2
+	\end{align*}
+	Now we can integrate the differential version of the inequality over time:
+	\begin{align*}
+	\int_0^s \frac{d}{dt} \seminorm{u(t)}_1^2 \dt
+	\leq \int_0^s \norm{f(t)}_0^2 \dt - \int_0^s \norm{u'(t)}_0^2 \dt \\
+	\seminorm{u(s)}_1^2 - \seminorm{u(0)}_1^2
+	\leq \int_0^s \norm{f(t)}_0^2 \dt - \int_0^s \norm{u'(t)}_0^2 \dt \\
+	\seminorm{u(s)}_1^2 + \int_0^s \norm{u'(t)}_0^2 \dt
+	\leq \seminorm{u(0)}_1^2 + \int_0^s \norm{f(t)}_0^2 \dt
+	\end{align*}
+\item By Poincaré's inequality in $H_0^1(\Omega)$,
+	there exists a constant $C_2 > 0$ independent of $t$ such that
+	\[
+	\norm{u(t)}_1^2 \leq C_2^2 \seminorm{u(t)}_1^2
+	\]
+	holds for all $u(t) \in H^1(0,T;V)$.
+	Let $v \in V$ be the weak solution to the given Poisson problem.
+	This $v$ can also be seen as a constant function in $H^1(0,T;V)$.
+	Then, by taking the difference of the weak formulations,
+	we immediately get that $u(t)-v$ is a weak solution to the
+	corresponding homogenous parabolic equation ($f(t) \equiv 0$),
+	and so the three previous estimates also apply to $u(t)-v$.
+	In particular, if we sum the differential versions of inequalities b) and c),
+	we get that
+	\begin{align*}
+	\frac{d}{dt} \norm{u(t)-v}_1^2
+&	\leq -\seminorm{u(t)-v}_1^2 - \norm{\partial_t(u(t)-v)}_0^2 \\
+&	\leq -\seminorm{u(t)-v}_1^2
+	\leq -C_2^{-2} \norm{u(t)-v}_1^2.
+	\end{align*}
+	By Grönwall's lemma (in differential form), it follows that
+	\[
+	\norm{u(t)-v}_1^2
+	\leq \norm{u(0)-v}_1^2 e^{\int_0^t -C_2^{-2} \ds}
+	= \norm{u(0)-v}_1^2 e^{-tC_2^{-2}} \ ,
+	\]
+	and this implies
+	\[
+	\lim_{t\to\infty}\|u(t)-v\|_1 = 0,
+	\]
+	as required. $\square$
+\end{enumerate}
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,152 @@
+\documentclass[a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{enumitem}
+\usepackage{resizegather} \addtolength{\jot}{4pt}
+\usepackage{microtype}
+
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\DeclareMathOperator*{\argmin}{\arg\!\min}
+\DeclareMathOperator*{\argmax}{\arg\!\max}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\diver}{div}
+\DeclareMathOperator{\supp}{supp}
+\newcommand{\dx}{\, dx \,}
+\newcommand{\dy}{\, dy \,}
+\newcommand{\dt}{\, dt \,}
+\newcommand{\ds}{\, ds \,}
+\newcommand{\dxdy}{\, dx \:\! dy \,}
+\newcommand{\dvecx}{\, d\vec{x} \,}
+\newcommand{\dsigma}{\, d\sigma \,}
+\newcommand{\area}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\seminorm}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\dpair}[1]{\left\langle #1 \right\rangle}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\C}{\mathbb{C}}
+\renewcommand{\Re}{\operatorname{Re}}
+\renewcommand{\Im}{\operatorname{Im}}
+
+\title{\huge{Advanced Discretization Techniques \\ Homework 11}}
+\author{\Large{Bruno Degli Esposti, Xingyu Xu}}
+\date{January 14th - January 21st, 2020}
+
+\begin{document}
+
+\maketitle
+
+\section*{Exercise 20: Stability of the one-step $\theta$ method}
+The one-step $\theta$ method is defined as the iterative scheme
+\[
+\xi^0 = \xi_0, \quad
+\frac{\xi^{n+1}-\xi^n}{\Delta t} + \lambda(\theta\xi^{n+1}+(1-\theta)\xi^n) = 0,
+\]
+which can be reformulated as
+\[
+\xi^0 = \xi_0, \quad
+\xi^{n+1} = \frac{1-\lambda\Delta t(1-\theta)}{1+\lambda\Delta t\theta}\xi^n.
+\]
+Therefore, the complex function $R_\theta$ is defined as
+\[
+R_\theta(z)=\frac{1+(1-\theta)z}{1-\theta z},
+\]
+so that $\xi^{n+1} = R_\theta(-\lambda \Delta t) \xi^n$.
+If $\theta \in \{0,\frac{1}{2},1\}$, then we have
+\[
+R_0(z) = z+1,
+\qquad R_{1/2}(z) = \frac{1+z/2}{1-z/2},
+\qquad R_1(z) = \frac{1}{1-z}.
+\]
+Now we can determine the three domains of stability:
+\begin{itemize}
+\item $S_{R_0}$ is a circle with radius $1$ and center $(-1,0)$:
+\begin{align*}
+S_{R_0}
+&	= \{ z \in \C \mid \abs{z+1} < 1 \} \\
+&	= \{ z \in \C \mid (z+1)\overline{(z+1)} < 1 \} \\
+&	= \{ x+yi \in \C \mid (x+yi+1)(x-yi+1) < 1 \} \\
+&	= \{ x+yi \in \C \mid (x+1)^2 + y^2 < 1 \}.
+\end{align*}
+\item $S_{R_{1/2}}$ is the left half-plane:
+\begin{align*}
+S_{R_{1/2}}
+&	= \left\{ z \in \C \mid \abs{\frac{1+z/2}{1-z/2}} < 1 \right\} \\
+&	= \left\{ z \in \C \mid \left(\frac{1+z/2}{1-z/2}\right)
+                            \left(\frac{1+\bar{z}/2}{1-\bar{z}/2}\right) < 1 \right\} \\
+&	= \left\{ z \in \C \mid \frac{1+\Re(z)+z\bar{z}/4}{1-\Re(z)+z\bar{z}/4} < 1 \right\} \\
+&	= \left\{ z \in \C \mid 1+\Re(z)+z\bar{z}/4 < 1-\Re(z)+z\bar{z}/4 \right\} \\
+&	= \left\{ z \in \C \mid 2\Re(z) < 0 \right\}.
+\end{align*}
+\item $S_{R_1}$ is the whole complex plane, minus the unit circle centered at $(1,0)$:
+\begin{align*}
+S_{R_1}
+&	= \{ z \in \C \mid \abs{\frac{1}{1-z}} < 1 \} \\
+&	= \{ z \in \C \mid \abs{1-z} > 1 \} \\
+&	= \{ z \in \C \mid (1-z)\overline{(1-z)} > 1 \} \\
+&	= \{ x+yi \in \C \mid (1-x-yi)(1-x+yi) > 1 \} \\
+&	= \{ x+yi \in \C \mid (1-x)^2 + y^2 > 1 \}.
+\end{align*}
+\end{itemize}
+Moving on to L-stability, we have that
+\begin{align*}
+\lim_{Re(z)\to-\infty} R_\theta(z)
+&	= \lim_{Re(z)\to-\infty} \frac{1+(1-\theta)z}{1-\theta z} \\
+&	= \lim_{Re(z)\to-\infty} \frac{1/z+(1-\theta)}{1/z-\theta}
+	= \frac{1-\theta}{-\theta}
+	= 0
+\end{align*}
+if and only if $\theta = 1$ (if $\theta = 0$, the limit doesn't even exist). $\square$
+
+\section*{Exercise 21: Fully discrete estimate}
+The implicit Euler method is defined as the iterative scheme
+\[
+U^0 = u_0, \quad
+M \frac{U^{n+1}-U^n}{\tau_n} + AU^{n+1} = F^{n+1}.
+\]
+We begin the proof by testing the last equation with $U^{n+1}$:
+\[
+(U^{n+1})^T M \frac{U^{n+1}-U^n}{\tau_n} + (U^{n+1})^TAU^{n+1} = (U^{n+1})^TF^{n+1}.
+\]
+At the continuous level, this identity corresponds to
+\begin{equation}
+\int_\Omega u^{n+1} \left( \frac{u^{n+1}-u^n}{\tau_n} \right) \dx
++ \int_\Omega \nabla u^{n+1} \cdot \nabla u^{n+1} \dx
+= \int_\Omega f^{n+1} u^{n+1} \dx
+\end{equation}
+Using (1) and Cauchy-Schwarz's inequality (twice),
+we can now prove that the following estimate holds for each timestep $\tau_n$:
+\addtolength{\jot}{6pt}
+\begin{align*}
+\frac{\|u^{n+1}\|_0-\|u^{n}\|_0}{\tau_n}
+&	=\frac{\|u^{n+1}\|^2_0-\|u^n\|_0\|u^{n+1}\|_0}{\tau_n\|u^{n+1}\|_0}
+	\leq\frac{\|u^{n+1}\|^2_0-\langle u^n,u^{n+1}\rangle_0}{\tau_n\|u^{n+1}\|_0} \\
+&	=\frac{1}{\|u^{n+1}\|_0}\int_\Omega u^{n+1}\left(\frac{u^{n+1}-u^n}{\tau_n}\right)\dx \\
+&	\stackrel{(1)}{=}\frac{-\seminorm{u^{n+1}}_1
+		+\langle f^{n+1},u^{n+1}\rangle_0}{\|u^{n+1}\|_0} \\
+&	\leq\frac{\|f^{n+1}\|_0\|u^{n+1}\|_0}{\|u^{n+1}\|_0}
+	=\|f^{n+1}\|_0,
+\end{align*}
+which is equivalent to
+\[
+\norm{u^{n+1}}_0 - \norm{u^n}_0
+\leq \tau_n \norm{f^{n+1}}_0.
+\]
+Taking the sum on both sides as $n$ goes from $0$ to $s-1$, we finally obtain
+\[
+\sum_{n=0}^{s-1} \left( \norm{u^{n+1}}_0 - \norm{u^n}_0 \right)
+= \norm{u^s}_0 - \norm{u^0}_0
+\leq \sum_{n=0}^{s-1} \tau_n \norm{f^{n+1}}_0,
+\]
+which is a fully-discrete equivalent to the estimate proven in Exercise 19a). $\square$
+\end{document}
+
+
+
+
+

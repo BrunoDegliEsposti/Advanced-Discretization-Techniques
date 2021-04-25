@@ -1,0 +1,287 @@
+\documentclass[a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{resizegather} \addtolength{\jot}{4pt}
+\usepackage{microtype}
+
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\DeclareMathOperator*{\argmin}{\arg\!\min}
+\DeclareMathOperator*{\argmax}{\arg\!\max}
+\DeclareMathOperator*{\esssup}{ess\sup}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\diver}{div}
+\DeclareMathOperator{\supp}{supp}
+\newcommand{\dx}{\, dx \,}
+\newcommand{\dy}{\, dy \,}
+\newcommand{\dxy}{\, dx \:\! dy \,}
+\newcommand{\dvecx}{\, d\vec{x} \,}
+\newcommand{\dsigma}{\, d\sigma \,}
+\newcommand{\area}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\seminorm}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\dpair}[1]{\left\langle #1 \right\rangle}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Pone}{\mathbb{P}_1}
+
+\title{\huge{Advanced Discretization Techniques \\ Homework 7}}
+\author{\Large{Bruno Degli Esposti, Xingyu Xu}}
+\date{December 3rd - December 10th, 2019}
+
+\begin{document}
+
+\maketitle
+
+\section*{Exercise 15: Uzawa algorithm - a proof of convergence}
+\begin{description}
+\item[a)] The saddle point problem can be written in the following operator form:
+	\begin{align*}
+	Au + B^\ast p
+&	= f \\
+	Bu
+&	= g.
+	\end{align*}
+	$A$ is invertible, because it's positive definite (by assumption).
+	Hence, we can multiply the first equation by $BA^{-1}$ and
+	substitute $g$ for $Bu$ to get that
+	\begin{gather*}
+	Bu + BA^{-1}B^{\ast}p = BA^{-1} f \\
+	g + BA^{-1}B^{\ast}p = BA^{-1} f \\
+	Sp = BA^{-1} f - g.
+	\end{gather*}
+\item[b)] Given a linear system $Lx=r$, the $\omega$-relaxated Richardson method
+	is defined as the following iterative scheme:
+	\[
+	x^{k+1} = x^k + \omega(r-Lx^k).
+	\]
+	Uzawa's algorithm can be written in this form by substituting line 4 into line 6
+	(and eliminating $u^{k+1}$ in the process):
+	\begin{align*}
+	p^{k+1}-p^k
+&	= \omega(Bu^{k+1}-g)\\
+&	= \omega(B(A^{-1}f-A^{-1}B^\ast p^k)-g)\\
+&	= \omega(BA^{-1}f-g-BA^{-1}B^\ast p^k)\\
+&	= \omega(BA^{-1}f-g-Sp^k),
+	\end{align*}
+	As required, $L = S$ and $r = BA^{-1}f-g$.
+\item[c)] By the spectral theorem, $A^{1/2}$ is a well-defined, real,
+	s.p.d.\ operator. Then
+	\begin{gather*}
+	\|v\|_A
+	= \dpair{Av,v}_{H^1}^{1/2}
+	= \dpair{A^{1/2}A^{1/2}v,v}^{1/2}
+	= \dpair{A^{1/2}v,A^{1/2}v}^{1/2}
+	= \norm{A^{1/2}v}_1 \\
+	\norm{p}_S
+	= \dpair{Sp,p}_{L^2}^{1/2}
+	= \dpair{BA^{-1}B^*p,p}_{L^2}^{1/2}
+	= \dpair{A^{-1/2}B^*p,A^{-1/2}B^*p}_{H^1}^{1/2}
+	= \norm{A^{-1/2}B^*p}_1 \\
+	\dpair{Bv,p}_{L^2}
+	= \dpair{BA^{-1/2}A^{1/2}v,p}_{L^2}
+	= \dpair{A^{1/2}v,A^{-1/2}B^*p}_{H^1}.
+	\end{gather*}
+	By the Cauchy-Schwarz inequality, it follows that
+	\[
+	\sup_{v \in M_h} \frac{\dpair{Bv,p}}{\norm{v}_A}
+	= \sup_{v \in M_h} \frac{\dpair{A^{1/2}v,A^{-1/2}B^*p}}{\norm{A^{1/2}v}_1}
+	\leq \norm{A^{-1/2}B^*p}_1
+	= \norm{p}_S,
+	\]
+	and this inequality can be turned into an equality by choosing $v \in M_h$
+	in the $\sup$ as $A^{-1}B^*p$, so that $A^{1/2}v = A^{-1/2}B^*p$.
+\item[d)] In the Stokes case,
+	\[
+	a(u,v) = \int_\Omega Du : Dv \dx \qquad
+	b(v,q) = -\int_\Omega q \diver(v) \dx.
+	\]
+	Let $R(q)$ be the Rayleigh quotient associated with $S$:
+	\[
+	R(q) = \frac{\dpair{Sq,q}}{\dpair{q,q}}.
+	\]
+	Since $S$ is s.p.d., it follows from the min-max theorem that
+	\[
+	\lambda_\text{min}(S) = \inf_{0 \neq q \in X_h} R(q)
+	\quad \text{and} \quad
+	\lambda_\text{max}(S) = \sup_{0 \neq q \in X_h} R(q).
+	\]
+	If we now combine the result from point c) with the inf-sup condition, we get that
+	\begin{align*}
+	\lambda_\text{min}(S)
+&	= \inf_{0 \neq q \in X_h} \frac{\dpair{Sq,q}}{\dpair{q,q}}
+	= \inf_{0 \neq q \in X_h} \frac{\norm{q}_S^2}{\norm{q}_0^2}
+	%= \inf_{0 \neq q \in X_h} \sup_{0 \neq v \in M_h}
+	= \inf_{q} \sup_{v} \frac{\dpair{Bv,q}^2}{\norm{v}_A^2 \norm{q}_0^2} \\
+&	= \inf_{q} \sup_{v} \frac{\dpair{Bv,q}^2}{a(v,v) \norm{q}_0^2}
+	= \inf_{q} \sup_{v} \frac{\dpair{Bv,q}^2}{\seminorm{v}_1^2 \norm{q}_0^2}
+	= \beta^2,
+	\end{align*}
+	so the first half of the proof is complete. For the second half,
+	we first need to show that $\norm{\diver(v)}_0^2 \leq \norm{v}_A^2$:
+	\begin{align*}
+	\norm{\diver(v)}_0^2
+&	= \int_\Omega \left( \sum_{i=1}^d \partial_i v_i(x) \right)^2 \dx
+	= \int_\Omega \sum_{i,j=1}^d \partial_i v_i(x) \partial_j v_j(x) \dx \\
+&	= 0 + 0 + \int_\Omega \sum_{i,j=1}^d \partial_j v_i(x) \partial_i v_j(x) \dx \\
+&	= \int_\Omega \sum_{i=1}^d (\partial_i v_i(x))^2 \dx
+		+ \int_\Omega \sum_{1 \leq i < j \leq d}
+		2 \partial_j v_i(x) \partial_i v_j(x) \dx \\
+&	\leq \int_\Omega \sum_{i=1}^d (\partial_i v_i(x))^2 \dx
+		+ \int_\Omega \sum_{1 \leq i < j \leq d}
+		(\partial_j v_i(x))^2 + (\partial_i v_j(x))^2 \dx \\
+&	= \int_\Omega \sum_{i,j=1}^d (\partial_i v_j(x))^2 \dx
+	= a(v,v)
+	= \norm{v}_A^2.
+	\end{align*}
+	We have used integration by parts twice (and, implicity, a density argument
+	with $C_0^\infty(\Omega)$ functions), symmetry of second derivatives and the
+	inequality $2ab \leq a^2 + b^2$. We can now conclude the second part of the proof:
+	\begin{align*}
+	\lambda_\text{max}(S)
+&	= \sup_{0 \neq q \in X_h} \frac{\dpair{Sq,q}}{\dpair{q,q}}
+	= \sup_{q} \sup_{v} \frac{b(v,q)^2}{\norm{v}_A^2 \norm{q}_0^2} \\
+&	= \sup_{q} \sup_{v} \frac{
+		\left( \int_\Omega q \diver(v) \dx \right)^2
+		}{\norm{v}_A^2 \norm{q}_0^2}
+	\leq \sup_{q} \sup_{v} \frac{
+		\left( \int_\Omega q^2 \dx \right)
+		\left( \int_\Omega \diver(v)^2 \dx \right)
+		}{\norm{v}_A^2 \norm{q}_0^2} \\
+&	= \sup_{q} \sup_{v} \frac{\norm{q}_0^2 \norm{\diver(v)}_0^2}
+		{\norm{v}_A^2 \norm{q}_0^2}
+	\leq \sup_{0 \neq v \in M_h} \frac{\norm{v}_A^2}{\norm{v}_A^2}
+	= 1.
+	\end{align*}
+\item[e)] By induction on the error estimate for Richardson's method, we get that
+	\[
+	\norm{p-p^k}_0 \leq (\rho(I-S))^k \norm{p-p^0}_0.
+	\]
+	In point 4) we have shown that $\sigma(S) \subseteq [\beta^2,1]$,
+	so $\sigma(I-S) \subseteq [0,1-\beta^2]$ and $\rho(I-S) \leq 1 - \beta^2$.
+	This is enough to prove the first error estimate for Uzawa's algorithm.
+	To prove the second one, consider the first equation of the saddle point problem
+	and line 4 in the algorithm:
+	\[
+	Au + B^*p = f \qquad Au^{k+1} + B^*p^k = f.
+	\]
+	Subtracting one equation from the other gives
+	\[
+	A(u-u^{k+1})+B^\ast(p-p^k)=0,
+	\]
+	from which we can deduce that
+	\begin{align*}
+	\seminorm{u-u^{k+1}}_1^2
+&	= \norm{u-u^{k+1}}_A^2
+	= \dpair{A(u-u^{k+1}),u-u^{k+1}}_{H^1} \\
+&	= \dpair{-B^*(p-p^k),-A^{-1}B^*(p-p^k)}_{H^1} \\
+&	= \dpair{S(p-p^k),p-p^k}_{L^2}
+	\leq \norm{S(p-p^k)}_0 \norm{p-p^k}_0 \\
+&	\leq \norm{S}_2 \norm{p-p^k}_0^2
+	\leq \rho(S) \norm{p-p^k}_0^2
+	\leq (1-\beta^2)^{2k} \norm{p-p^0}_0^2.
+	\end{align*}
+	Now we just have to take the square root of both sides. $\square$
+\end{description}
+
+\section*{Exercise 16: Voronoi diagrams}
+\begin{description}
+\item[a)] Let $S_{ij} = \{x \in \R^2 \bigm| \abs{x-a_i} < \abs{x-a_j}\}$,
+	so that $\tilde{\Omega}_i = \bigcap_{j \neq i} S_{ij}$.
+	Geometric intuition suggests that the sets $S_{ij}$ are open half-planes,
+	and that their boundaries $\partial S_{ij}$ are perpendicular bisectors
+	of the line segments $a_i a_j$.
+	To show that this is really the case, consider the following:
+	\begin{gather*}
+	x \in S_{ij}
+	\iff \abs{x-a_i} < \abs{x-a_j}
+	\iff \abs{x-a_j}^2 - \abs{x-a_i}^2 > 0 \\
+	\iff \dpair{x-a_j,x-a_j} + \dpair{x-a_i,a_i-x} > 0 \\
+	\iff \dpair{x-a_j,x-a_j} + \dpair{x-a_i,a_i-x}
+	   + \dpair{x-a_j,a_i-x} + \dpair{x-a_i,x-a_j} > 0 \\
+	\iff \dpair{x-a_j,x-a_j} + \dpair{x-a_j,a_i-x}
+	   + \dpair{x-a_i,a_i-x} + \dpair{x-a_i,x-a_j} > 0 \\
+	\iff \dpair{x-a_j,x-a_j+a_i-x} + \dpair{x-a_i,a_i-x+x-a_j} > 0 \\
+	\iff \dpair{x-a_j+x-a_i,a_i-a_j} > 0
+	\iff \dpair{x-\frac{a_i+a_j}{2},a_i-a_j} > 0.
+	\end{gather*}
+	We can now recognize the definition of open half-plane, the midpoint
+	$(a_i+a_j)/2$ and the direction $a_i-a_j$ of the line segment $a_i a_j$.
+	This proves that $\tilde{\Omega}_i$ is convex, because we've expressed
+	$\tilde{\Omega}_i$ as the intersection of convex sets
+	(the open semiplanes $S_{ij}$).
+	Moreover, the intersection of open half-planes is a (topologically)
+	open polygonal region, so its boundary must be a polygonal chain
+	(allowing half-lines as edges, if $\tilde{\Omega}_i$ is unbounded).
+\item[b)] Let $n = \#(\partial B(p) \cap \mathcal{A})$. To prove i),
+	let $p$ be a Voronoi vertex. This means that $p$ is a vertex of
+	the boundary of some Voronoi polygon $\tilde{\Omega}_i$, so
+	there exist $j,k \in \bar{\Lambda}$ such that $i,j,k$ are all distinct
+	and $p \in \partial S_{ij} \cap \partial S_{ik}$.
+	The point $p$ is therefore the circumcenter of the triangle $a_i a_j a_k$,
+	since we have proved in point a) that $\partial S_{ij}$ and $\partial S_{ik}$
+	are the perpendicular bisectors of the sides $a_i a_j$ and $a_i a_k$.
+	As Euclid could confirm, this in turn implies that $p$ has equal
+	distance from all the vertices $a_i, a_j, a_k$ of the triangle, so $n \geq 3$
+	because we know that $\{a_i,a_j,a_k\} \subseteq \partial B(p) \cap \mathcal{A}$.
+	To prove the converse, we can follow the same line of reasoning.
+	Let $n \geq 3$. Then there exist distinct
+	$\{a_i,a_j,a_k\}$ in $\partial B(p) \cap \mathcal{A}$, and once again
+	$p$ is the circumcenter of the triangle $a_i a_j a_k$.
+	This means that $p \in \partial S_{ij} \cap \partial S_{ik}$,
+	so $p$ is a Voronoi vertex.
+	
+	To prove ii), let $p$ be a point on the edge of a Voronoi polygon,
+	say $\tilde{\Omega}_i$. We want to prove that $n=2$.
+	On the one hand, we know that $n$ can't be greater than $2$, otherwise $p$
+	would be a vertex by i) (we implicitly assume that $p$
+	is not on the boundary of the edge).
+	On the other hand, we know that $p \in \partial S_{ij}$ for some $j \neq i$,
+	so $p$ must be the midpoint of $a_i a_j$.
+	This means that, if $\partial B(p) \cap \mathcal{A}$ contains $a_i$
+	(which it does, by the choice of $i$), then it must also	contain $a_j$.
+	So $n$ can only be 2. To prove the converse, let $p \in \R^2$ such that $n = 2$.
+	For the sake of contradiction, suppose that $p$ belongs to any of
+	the open sets $\tilde{\Omega}_i$. Then $\abs{p-a_i} < \abs{p-a_j}$
+	for every $j \neq i$, so $\partial B(p)$ can only contain
+	one point from $\mathcal{A}$, namely $a_i$.
+	This contradicts the assumption $n = 2$, so
+	$p$ must be on the boundary of some Voronoi polygon.
+	But $p$ cannot be a vertex, otherwise we would have $n \geq 3$
+	by point i). Therefore $p$ can only be on an edge, as required. $\square$
+\end{description}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,213 @@
+\documentclass[a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{enumitem}
+\usepackage{resizegather} \addtolength{\jot}{4pt}
+\usepackage{microtype}
+
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\DeclareMathOperator*{\argmin}{\arg\!\min}
+\DeclareMathOperator*{\argmax}{\arg\!\max}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\diver}{div}
+\DeclareMathOperator{\supp}{supp}
+\newcommand{\dx}{\, dx \,}
+\newcommand{\dy}{\, dy \,}
+\newcommand{\dxdy}{\, dx \:\! dy \,}
+\newcommand{\dvecx}{\, d\vec{x} \,}
+\newcommand{\dsigma}{\, d\sigma \,}
+\newcommand{\area}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\seminorm}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\dpair}[1]{\left\langle #1 \right\rangle}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+
+\title{\huge{Advanced Discretization Techniques \\ Homework 8}}
+\author{\Large{Bruno Degli Esposti, Xingyu Xu}}
+\date{December 10th - December 17th, 2019}
+
+\begin{document}
+
+\maketitle
+
+\section*{Exercise 17: A FV scheme for a nonlinear equation}
+\begin{enumerate}[label=\textbf{\alph*)},leftmargin=*]
+\item The vector $\varphi(V)$ is defined as the solution $U$ to
+	the linear system (A), with $h_i f_i(V_i)$ on the right-hand side.
+	Once we replace $\mathcal{F}_{i+1/2}$ and $\mathcal{F}_{i-1/2}$ with their
+	definitions in terms of $U_i$, we can write the linear system as
+	$AU = b(V)$, where $A \in \R^{N \times N}$ and $b(V) \in \R^N$
+	are defined as follows:
+	\begin{align*}
+&	A_{i,i-1} = -\frac{1}{h_{i-1/2}} \;\; \forall \, i = 2,\dots,N, \quad
+	A_{i,i} = \frac{1}{h_{i-1/2}} + \frac{1}{h_{i+1/2}} \;\; \forall \, i = 1,\dots,N, \\
+&	A_{i,i+1} = -\frac{1}{h_{i+1/2}} \;\; \forall \, i = 1,\dots,N-1, \quad
+	A_{i,j} = 0 \;\; \text{otherwise,}
+	\end{align*}
+	\[
+	b(V)_i = h_i f_i(V_i) \quad \forall \, i = 1,\dots,N. \\[4pt]
+	\]
+	The function $\varphi$ is then defined as $\varphi(V) = A^{-1}b(V)$,
+	provided that $A$ is invertible. By the calculations we will do in point b)
+	(following the hint), we know that
+	\[
+	U^T A U = \sum_{i=0}^N \frac{(U_{i+1}-U_i)^2}{h_{i+1/2}} \geq 0.
+	\]
+	As long as $U \neq 0$, we will show in point d) that the inequality is strict:
+	this means that $A$ is positive definite. Therefore, $A$ is invertible
+	and $\varphi$ is well-defined.
+	The right hand side $b(V)$ is not a linear function of $V$,
+	so $\varphi(V) = A^{-1}b(V)$ cannot be linear.
+	Moving on to continuity, let $\{V^k\}$ be a sequence in $\R^N$
+	converging to $V$. We want to prove that
+	$\lim_{k \to +\infty} \varphi(V^k) = \varphi(V)$.
+	By the continuity of $A^{-1}$, it's enough to show that
+	$\lim_{k \to +\infty} b(V^k)_i = b(V)_i$ holds for each $i = 1,\dots,N$.
+	Indeed, by Lebesgue's dominated convergence lemma and the continuity of
+	$f(x,\cdot)$, we have that
+	\begin{align*}
+	\lim_{k \to +\infty} b(V^k)_i
+&	= \lim_{k \to +\infty} \int_{\Omega_i} f(x,V_i^k) \dx
+	= \int_{\Omega_i} \lim_{k \to +\infty} f(x,V_i^k) \dx \\
+&	= \int_{\Omega_i} f(x,V_i) \dx
+	= b(V)_i.
+	\end{align*}
+	In order to apply Lebesgue's lemma, we can choose $g(x) \equiv \norm{f}_\infty$
+	as the dominating function, clearly integrable in the limited interval $\Omega_i$.
+	Lastly, the fixed-point property is proven as follows:
+	\[
+	\varphi(U) = U
+	\iff A^{-1} b(U) = U
+	\iff AU = b(U)
+	\iff \text{(A)},
+	\]
+	by the definitions of $A$ and $b$.
+\item Following the hint, we get that
+	\begin{align*}
+	\sum_{i=1}^N U_i h_i f_i(V_i)
+&	= \sum_{i=1}^N U_i \left( -\frac{U_{i+1}-U_i}{h_{i+1/2}}
+                              +\frac{U_i-U_{i-1}}{h_{i-1/2}} \right) \\
+&	= \sum_{i=1}^N \frac{-U_{i+1}U_i+U_i^2}{h_{i+1/2}}
+    + \sum_{i=1}^N \frac{U^2_i-U_{i-1}U_i}{h_{i-1/2}} \\
+&	= \sum_{i=1}^N \frac{-U_{i+1}U_i+U_i^2}{h_{i+1/2}}
+	+ \sum_{j=0}^{N-1} \frac{U^2_{j+1}-U_jU_{j+1}}{h_{j+1/2}} \\
+&	= \sum_{i=0}^N \frac{-U_{i+1}U_i+U_i^2}{h_{i+1/2}}
+	+ \sum_{j=0}^N \frac{U^2_{j+1}-U_jU_{j+1}}{h_{j+1/2}} \\
+&	= \sum^N_{i=0} \frac{U_{i+1}^2-2U_{i+1}U_i+U_i^2}{h_{i+1/2}}
+	= \sum^N_{i=0} \frac{(U_{i+1}-U_i)^2}{h_{i+1/2}}.
+	\end{align*}
+	The boundary conditions $U_0 = U_{N+1} = 0$ allowed us to include
+	$i=0$ and $j=N$ in the range of the sums.
+	Now we can easily complete the proof:
+	\begin{align*}
+	\sum^N_{i=0} \frac{(U_{i+1}-U_i)^2}{h_{i+1/2}}
+&	= \sum_{i=1}^N U_i h_i f_i(V_i)
+	\leq \sum_{i=1}^N h_i \abs{U_i} \abs{f_i(V_i)} \\
+&	= \sum_{i=1}^N h_i \abs{U_i} \abs{\frac{1}{h_i} \int_{\Omega_i} f(x,V_i) \dx}
+	\leq \sum_{i=1}^N \abs{U_i} \abs{\Omega_i} \norm{f}_\infty \\
+&	= M \sum_{i=1}^N (x_{i+1/2}-x_{i-1/2}) \abs{U_i}
+	= M \sum_{i=1}^N h_i \abs{U_i}.
+	\end{align*}
+\item The boundary condition $U_0 = 0$ allows us to write $U_i$ as a telescopic series.
+	Then, by Cauchy-Schwarz's inequality, we have that
+	\begin{align*}
+	|U_i|
+&	= \abs{ \sum_{j=0}^{i-1} (U_{j+1}-U_j) }
+	= \abs{ \sum_{j=0}^{i-1} \frac{U_{j+1}-U_j}{(h_{j+1/2})^{1/2}} (h_{j+1/2})^{1/2} } \\
+&	\leq \abs{ \sum^{i-1}_{j=0}\frac{(U_{j+1}-U_j)^2}{h_{j+1/2}} }^{1/2}
+	     \abs{ \sum^{i-1}_{j=0}h_{j+1/2} }^{1/2} \\
+&	\leq \left(\sum_{j=0}^{N} \frac{(U_{j+1}-U_j)^2}{h_{j+1/2}}\right)^{1/2}
+	     \left( \sum_{j=0}^{N} h_{j+1/2} \right)^{1/2}
+	= \left(\sum_{j=0}^{N} \frac{(U_{j+1}-U_j)^2}{h_{j+1/2}}\right)^{1/2}.
+	\end{align*}
+	Now we can substitute this inequality into the one we've proved in point b):
+	\begin{gather*}
+	\sum^N_{i=0} \frac{(U_{i+1}-U_i)^2}{h_{i+1/2}}
+	\leq M \sum_{i=1}^N h_i \abs{U_i}
+	\leq M \sum_{i=1}^N h_i \left(
+		\sum_{j=0}^{N} \frac{(U_{j+1}-U_j)^2}{h_{j+1/2}}\right)^{1/2} \\
+	\left( \sum^N_{i=0} \frac{(U_{i+1}-U_i)^2}{h_{i+1/2}} \right)^{1/2}
+	\leq M \sum_{i=1}^N h_i
+	= M.
+	\end{gather*}
+	Thus we can choose $C(f) = M^2 = \norm{f}_\infty^2$.
+\item First we prove that
+	\[
+	\norm{V} = \left( \sum_{j=0}^N \frac{(V_{j+1}-V_j)^2}{h_{j+1/2}} \right)^{1/2}
+	\]
+	defines a norm. For each $V \in \R^N$, $\norm{V} \geq 0$ because $\norm{V}$
+	is the square root of the sum of positive terms. As for the triangle inequality,
+	\begin{align*}
+	\norm{V+W}^2
+&	= \sum_{j=0}^N \frac{(V_{j+1}+W_{j+1}-V_j-W_j)^2}{h_{j+1/2}}
+	= \sum_{j=0}^N \frac{(V_{j+1}-V_j+W_{j+1}-W_j)^2}{h_{j+1/2}} \\
+&	= \sum_{j=0}^N \frac{(V_{j+1}-V_j)^2 + (W_{j+1}-W_j)^2
+	                                     + 2(V_{j+1}-V_j)(W_{j+1}-W_j)}{h_{j+1/2}} \\
+&	\leq \norm{V}^2 + \norm{W}^2 + \sum_{j=0}^N \frac{|2(V_{j+1}-V_j)(W_{j+1}-W_j)|}
+		{\sqrt{h_{j+1/2}} \sqrt{h_{j+1/2}}} \\
+&	\leq \norm{V}^2 + \norm{W}^2
+	+ 2\left(\sum^N_{j=0}\frac{(V_{j+1}-V_j)^2}{h_{j+1/2}}\right)^{1/2}
+	   \left(\sum^N_{j=0}\frac{(W_{j+1}-W_j)^2}{h_{j+1/2}}\right)^{1/2} \\
+&	= \norm{V}^2 + \norm{W}^2 + 2 \norm{V} \norm{W}
+	= (\norm{V} + \norm{W})^2.
+	\end{align*}
+	Now we check that the norm is absolutely homogeneous:
+	\begin{align*}
+	\norm{\alpha V}
+&	= \left( \sum_{j=0}^N \frac{(\alpha V_{j+1} - \alpha V_j)^2}{h_{j+1/2}} \right)^{1/2}
+	= \left( \sum_{j=0}^N \frac{\alpha^2 (V_{j+1} - V_j)^2}{h_{j+1/2}} \right)^{1/2} \\
+&	= \left( \alpha^2 \sum_{j=0}^N \frac{(V_{j+1} - V_j)^2}{h_{j+1/2}} \right)^{1/2}
+	= \abs{\alpha} \left( \sum_{j=0}^N \frac{(V_{j+1} - V_j)^2}{h_{j+1/2}} \right)^{1/2}.
+	\end{align*}
+	Lastly, we need to prove that $\norm{V} = 0$ implies $V=0$. Indeed,
+	\begin{align*}
+	\left( \sum_{j=0}^N \frac{(V_{j+1}-V_j)^2}{h_{j+1/2}} \right)^{1/2} = 0
+&	\quad \Longrightarrow \quad V_{j+1}-V_j=0 \quad \forall \, j = 0,\dots,N \\
+&	\quad \Longrightarrow \quad V_0 = V_1 = \dots = V_N = V_{N+1} = 0 \\
+&	\quad \Longrightarrow \quad V = 0.
+	\end{align*}
+	Moving on to the second part of the proof, let
+	$D = \{V \in \R^N \mid \norm{V} \leq M\}$ and let $\hat{\varphi} = \varphi |_D$.
+	By point c), we know that the range of $\hat{\varphi}$ is a subset of $D$.
+	Therefore, the continuous function $\hat{\varphi} \colon D \to D$ has a
+	fixed point $U$ by Brouwer's theorem (which we can apply here, because $D$
+	is a compact and convex subset of $\R^N$).
+	Then $U = \hat{\varphi}(U) = \varphi(U)$, so the linear system (A)
+	has at least $U$ as a solution by what we've proved in point a). $\square$
+\end{enumerate}
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
